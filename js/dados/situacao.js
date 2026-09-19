@@ -46,6 +46,11 @@ export const contaPendente = () => pendente;
  * a suspensão pareceria não funcionar durante os testes).
  */
 export function exigirContaAtiva() {
+  if (pendente) {
+    throw new Error(
+      "Cadastro ainda não aprovado pela plataforma: nada pode ser gravado até a aprovação.",
+    );
+  }
   if (suspensa) {
     throw new Error(
       "Conta suspensa: não é possível gravar novos dados. " +

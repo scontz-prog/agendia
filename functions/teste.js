@@ -15,6 +15,11 @@ import {
   telefoneFormatado,
   aplicarVariaveis,
   valoresDo,
+  diasEntre,
+  minutosAte,
+  TEXTO_CONFIRMACAO,
+  TEXTO_LEMBRETE,
+  textoAvisoEmpresa,
 } from "./texto.js";
 
 let passou = 0;
@@ -158,4 +163,62 @@ teste("modelo do painel sai inteiro, sem chave sobrando", () => {
   assert.ok(texto.includes("14:00"));
 });
 
-console.log(`\n${passou} teste(s) passaram.\n`);
+console.log("\nAntecedência do lembrete");
+
+teste("dias entre datas, atravessando o mês", () => {
+  assert.equal(diasEntre("2026-09-30", "2026-10-01"), 1);
+  assert.equal(diasEntre("2026-09-19", "2026-09-19"), 0);
+  assert.equal(diasEntre("2026-12-31", "2027-01-02"), 2);
+});
+
+teste("minutos até um horário hoje", () => {
+  const agora = { dia: "2026-09-19", minutos: 14 * 60 };
+  assert.equal(minutosAte(agora, "2026-09-19", 16 * 60), 120);
+});
+
+teste("minutos até amanhã cedo, a partir da noite", () => {
+  const agora = { dia: "2026-09-19", minutos: 22 * 60 };
+  assert.equal(minutosAte(agora, "2026-09-20", 9 * 60), 11 * 60);
+});
+
+teste("horário que já passou dá negativo (não recebe lembrete)", () => {
+  const agora = { dia: "2026-09-19", minutos: 15 * 60 };
+  assert.ok(minutosAte(agora, "2026-09-19", 14 * 60) < 0);
+});
+
+teste("agoraNoFuso também devolve os minutos do dia", () => {
+  const r = agoraNoFuso("America/Sao_Paulo", new Date("2026-09-19T17:30:00Z"));
+  assert.equal(r.minutos, 14 * 60 + 30); // 14:30 em Brasília
+});
+
+console.log("\nTextos dos e-mails");
+
+const ag = {
+  dia: "2026-09-20", inicioMin: 600, servicoNome: "Escova", barbeiroNome: "Renata",
+  precoCentavos: 5500, clienteNome: "Ana Paula Souza", clienteTelefone: "79988776655",
+  clienteEmail: "ana@exemplo.com",
+};
+const est = { nome: "Salão Teste", whatsapp: "79999990000" };
+
+for (const [nome, t] of [["confirmação", TEXTO_CONFIRMACAO], ["lembrete", TEXTO_LEMBRETE]]) {
+  teste(`${nome}: nenhuma variável sobra sem trocar`, () => {
+    const v = valoresDo(ag, { nome: ag.clienteNome }, est, "");
+    const saida = aplicarVariaveis(t.assunto, v) + "\n" + aplicarVariaveis(t.texto, v);
+    assert.ok(!saida.includes("{"), saida);
+    assert.ok(saida.includes("Ana") && saida.includes("10:00") && saida.includes("Salão Teste"));
+  });
+}
+
+teste("aviso à empresa traz os dados do minicadastro", () => {
+  const { assunto, texto } = textoAvisoEmpresa(ag, est);
+  assert.ok(assunto.includes("Ana Paula Souza"));
+  for (const trecho of ["(79) 98877-6655", "ana@exemplo.com", "Escova com Renata", "10:00"]) {
+    assert.ok(texto.includes(trecho), `faltou "${trecho}" em:\n${texto}`);
+  }
+});
+
+
+
+console.log(`
+${passou} teste(s) passaram.
+`);

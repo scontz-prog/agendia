@@ -28,16 +28,94 @@ observarSessao((ctx) => {
     location.replace("entrar.html");
     return;
   }
+
+  // Falha ao carregar (rede, permissão) NÃO é "conta sem estabelecimento".
+  // Antes os dois casos caíam no mesmo redirecionamento para entrar.html,
+  // que devolvia para o painel, que falhava de novo — o painel piscava e
+  // sumia. Agora o erro aparece e a pessoa decide tentar de novo.
+  if (ctx.erro) {
+    telaFalhaAoCarregar(ctx.erro);
+    return;
+  }
+
   if (!ctx.perfil || !ctx.barbearia) {
-    // conta existe mas a barbearia não foi cadastrada
+    // conta existe mas o estabelecimento não foi cadastrado
     location.replace("entrar.html");
     return;
   }
+
+  // Sem aprovação da plataforma não há painel nenhum — nem para o dono,
+  // nem para a equipe. As regras do Firestore também recusam qualquer
+  // gravação dessa conta; esta tela é para a pessoa entender o porquê.
+  if ((ctx.barbearia.aprovacao ?? "aprovada") !== "aprovada") {
+    telaAguardandoAprovacao(ctx.barbearia);
+    return;
+  }
+
   if (!iniciado) {
     iniciado = true;
     montar(ctx);
   }
 });
+
+/** Esconde a moldura do painel: sem aprovação, não há menu a oferecer. */
+function telaSemPainel(...filhos) {
+  document.querySelector(".app")?.classList.add("sem-nav");
+  document.querySelector(".app-lateral")?.classList.add("oculto");
+  document.querySelector(".app-topo .topo-dir #btn-link")?.classList.add("oculto");
+  render(
+    conteudo,
+    el("div", { class: "cartao cartao-corpo tela-espera" }, [
+      ...filhos,
+      el("div", { class: "linha", style: { justifyContent: "center", marginTop: "18px", flexWrap: "wrap" } }, [
+        el("button", { class: "btn btn-primario", type: "button", onclick: () => location.reload() },
+          "Verificar novamente"),
+        el("button", {
+          class: "btn btn-secundario",
+          type: "button",
+          onclick: async () => {
+            await sair();
+            location.replace("entrar.html");
+          },
+        }, "Sair"),
+      ]),
+    ]),
+  );
+}
+
+function telaAguardandoAprovacao(barbearia) {
+  document.title = `${barbearia.nome} — Agendia`;
+  const rejeitada = barbearia.aprovacao === "rejeitada";
+
+  telaSemPainel(
+    el("div", { style: { fontSize: "2.25rem" }, "aria-hidden": "true" }, rejeitada ? "⛔" : "⏳"),
+    el("h1", { style: { marginTop: "10px", fontSize: "1.25rem" } },
+      rejeitada ? "Cadastro não aprovado" : "Cadastro em análise"),
+    el("p", { class: "suave", style: { marginTop: "8px" } },
+      rejeitada
+        ? `O cadastro de ${barbearia.nome} não foi aprovado pela plataforma.`
+        : `Recebemos o cadastro de ${barbearia.nome}. O acesso ao painel é liberado assim que a plataforma aprovar.`),
+    rejeitada && barbearia.motivoRejeicao
+      ? el("p", { class: "pequeno", style: { marginTop: "8px" } }, `Motivo: ${barbearia.motivoRejeicao}`)
+      : null,
+    el("p", { class: "fraco pequeno", style: { marginTop: "10px" } },
+      rejeitada
+        ? "Fale com a plataforma se quiser rever a decisão."
+        : "Não é preciso fazer nada: depois da aprovação, clique em “Verificar novamente” ou entre de novo."),
+  );
+}
+
+function telaFalhaAoCarregar(erro) {
+  console.error(erro);
+  telaSemPainel(
+    el("div", { style: { fontSize: "2.25rem" }, "aria-hidden": "true" }, "⚠️"),
+    el("h1", { style: { marginTop: "10px", fontSize: "1.25rem" } }, "Não foi possível abrir o painel"),
+    el("p", { class: "suave", style: { marginTop: "8px" } },
+      "Houve uma falha ao carregar os dados da conta. Verifique a conexão e tente de novo."),
+    el("p", { class: "fraco pequeno", style: { marginTop: "8px" } },
+      String(erro?.code ?? erro?.message ?? "")),
+  );
+}
 
 function montar(ctx) {
   const { barbearia, perfil } = ctx;

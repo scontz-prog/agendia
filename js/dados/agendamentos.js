@@ -152,6 +152,7 @@ export async function criarAgendamento(bid, dados) {
     clienteId,
     clienteNome,
     clienteTelefone,
+    clienteEmail = null,
     observacoes = null,
     origem = "painel",
     status = origem === "publico" ? "agendado" : "confirmado",
@@ -178,6 +179,10 @@ export async function criarAgendamento(bid, dados) {
     clienteId,
     clienteNome: String(clienteNome).trim(),
     clienteTelefone: digitos(clienteTelefone),
+    // O e-mail vai no próprio agendamento, e não só na ficha: é para este
+    // endereço que saem a confirmação e o lembrete DESTE horário, mesmo
+    // que a ficha tenha outro (a ficha não pode ser reescrita de fora).
+    clienteEmail: String(clienteEmail ?? "").trim().toLowerCase() || null,
     servicoId: servico.id,
     servicoNome: servico.nome,
     precoCentavos: servico.precoCentavos ?? 0,

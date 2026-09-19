@@ -89,96 +89,67 @@ export async function telaConfiguracoes({ container, ehAtual }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Lembrete automático por e-mail                                      */
+/* Notificações por e-mail                                             */
 /*                                                                     */
 /* Esta tela só GRAVA a configuração. Quem envia é a Cloud Function     */
-/* (functions/index.js), que roda no Google de hora em hora — o site    */
-/* continua estático e não envia nada por conta própria.                */
+/* (functions/index.js), que roda no Google — o site continua estático  */
+/* e não envia nada por conta própria.                                  */
 /* ------------------------------------------------------------------ */
 function secaoLembretes(barbearia, modelos, gestor) {
   const T = termos(barbearia);
-  const config = barbearia.lembretes ?? {};
+  const cfg = barbearia.lembretes ?? {};
   const porEmail = modelos.filter((m) => m.canal === "email");
-
   const erro = el("div", { class: "aviso aviso-erro oculto" });
 
-  // Sem modelo de e-mail não há o que enviar. Melhor dizer isso do que
-  // deixar ligar um lembrete que nunca sai.
-  if (porEmail.length === 0) {
-    return el("section", { class: "cartao cartao-corpo secao" }, [
-      el("h2", {}, "Lembrete automático por e-mail"),
-      el("p", { class: "suave pequeno", style: { margin: "4px 0 12px" } },
-        `Avisa cada ${T.cliente} sobre o horário, sem ninguém precisar abrir o sistema.`),
-      el("div", { class: "aviso aviso-info" }, [
-        el("strong", {}, "Falta um modelo de e-mail. "),
-        "Crie um modelo com o canal E-mail acima — é o texto que será enviado.",
+  const caixa = (name, marcado, rotulo, ajuda) =>
+    el("label", { class: "linha", style: { gap: "10px", alignItems: "flex-start", marginBottom: "12px", cursor: gestor ? "pointer" : "default" } }, [
+      el("input", { type: "checkbox", class: "caixa-selecao", name, checked: marcado, disabled: !gestor, style: { marginTop: "2px" } }),
+      el("span", {}, [
+        el("span", {}, rotulo),
+        ajuda ? el("span", { class: "fraco pequeno", style: { display: "block", marginTop: "2px" } }, ajuda) : null,
       ]),
     ]);
-  }
-
-  const marcado = Boolean(config.ativo);
-
-  const ligar = el("input", {
-    type: "checkbox",
-    class: "caixa-selecao",
-    name: "ativo",
-    checked: marcado,
-    disabled: !gestor,
-  });
 
   const form = el("form", { onsubmit: enviar }, [
-    el("label", { class: "linha", style: { gap: "10px", marginBottom: "14px", cursor: gestor ? "pointer" : "default" } }, [
-      ligar,
-      el("span", {}, "Enviar lembrete automaticamente"),
-    ]),
-
     el("fieldset", { disabled: !gestor, style: { border: "none", padding: "0" } }, [
-      grupo(
-        "Modelo",
-        el(
-          "select",
-          { class: "campo", name: "modeloId" },
-          porEmail.map((m) =>
-            el("option", { value: m.id, selected: m.id === config.modeloId }, m.nome),
-          ),
-        ),
-      ),
+      caixa("confirmacaoCliente", cfg.confirmacaoCliente !== false,
+        `Confirmar ao ${T.cliente} por e-mail quando ele agendar`,
+        "Sai na hora, com data, horário e profissional."),
+
+      caixa("avisoEmpresa", cfg.avisoEmpresa !== false,
+        "Me avisar por e-mail a cada agendamento feito pelo link",
+        "Os lançados aqui no painel não geram aviso — você mesmo acabou de marcar."),
+
+      grupo("E-mail que recebe os avisos",
+        el("input", {
+          class: "campo", name: "emailAvisos", type: "email",
+          value: cfg.emailAvisos ?? barbearia.email ?? "",
+          placeholder: "voce@seunegocio.com",
+        })),
+
+      el("hr", { style: { border: "none", borderTop: "1px solid var(--borda)", margin: "16px 0" } }),
+
+      caixa("ativo", Boolean(cfg.ativo),
+        "Enviar lembrete antes do horário",
+        `O ${T.cliente} recebe um e-mail algumas horas antes. Quem cancelou não recebe, e ninguém é lembrado duas vezes.`),
 
       el("div", { class: "dupla" }, [
-        grupo(
-          "Quando",
-          el(
-            "select",
-            { class: "campo", name: "diasAntes" },
-            [
-              { v: 1, n: "Na véspera" },
-              { v: 2, n: "Dois dias antes" },
-              { v: 0, n: "No mesmo dia" },
-            ].map((o) =>
-              el("option", { value: String(o.v), selected: Number(config.diasAntes ?? 1) === o.v }, o.n),
-            ),
-          ),
-        ),
-        grupo(
-          "A que horas",
-          el(
-            "select",
-            { class: "campo", name: "horaEnvio" },
-            Array.from({ length: 17 }, (_, i) => i + 6).map((h) =>
-              el("option", { value: String(h), selected: Number(config.horaEnvio ?? 18) === h },
-                `${String(h).padStart(2, "0")}:00`),
-            ),
-          ),
-        ),
+        grupo("Quanto tempo antes",
+          el("select", { class: "campo", name: "antecedenciaHoras" },
+            [1, 2, 3, 6, 12, 24, 48].map((h) =>
+              el("option", { value: String(h), selected: Number(cfg.antecedenciaHoras ?? 2) === h },
+                h < 24 ? `${h} hora${h > 1 ? "s" : ""} antes` : h === 24 ? "1 dia antes" : "2 dias antes")))),
+        grupo("Texto do lembrete",
+          el("select", { class: "campo", name: "modeloId" }, [
+            el("option", { value: "", selected: !cfg.modeloId }, "Texto padrão do Agendia"),
+            ...porEmail.map((m) => el("option", { value: m.id, selected: m.id === cfg.modeloId }, m.nome)),
+          ])),
       ]),
-
-      el("p", { class: "fraco pequeno", style: { marginTop: "6px" } },
-        `Hora do fuso ${barbearia.timezone ?? "America/Sao_Paulo"}. Quem já cancelou não recebe, e ninguém é lembrado duas vezes do mesmo horário.`),
 
       erro,
 
       el("button", { class: "btn btn-primario", type: "submit", style: { marginTop: "14px" } },
-        "Salvar lembrete"),
+        "Salvar notificações"),
     ]),
   ]);
 
@@ -186,25 +157,22 @@ function secaoLembretes(barbearia, modelos, gestor) {
     evento.preventDefault();
     erro.classList.add("oculto");
     const botao = form.querySelector('button[type="submit"]');
+    const marcado = (n) => form.querySelector(`[name="${n}"]`).checked;
     const dados = dadosDoForm(form);
+    const config = {
+      confirmacaoCliente: marcado("confirmacaoCliente"),
+      avisoEmpresa: marcado("avisoEmpresa"),
+      emailAvisos: dados.emailAvisos,
+      ativo: marcado("ativo"),
+      antecedenciaHoras: dados.antecedenciaHoras,
+      modeloId: dados.modeloId,
+      linkPublico: linkPublico(barbearia.slug),
+    };
 
     try {
-      await comCarregamento(botao, "Salvando…", () =>
-        salvarLembretes(barbearia.id, {
-          ...dados,
-          ativo: ligar.checked,
-          linkPublico: linkPublico(barbearia.slug),
-        }),
-      );
-      atualizarBarbeariaNoContexto({
-        lembretes: {
-          ativo: ligar.checked,
-          modeloId: dados.modeloId,
-          horaEnvio: Number(dados.horaEnvio),
-          diasAntes: Number(dados.diasAntes),
-        },
-      });
-      sucesso(ligar.checked ? "Lembrete ligado." : "Lembrete desligado.");
+      await comCarregamento(botao, "Salvando…", () => salvarLembretes(barbearia.id, config));
+      atualizarBarbeariaNoContexto({ lembretes: { ...config, antecedenciaHoras: Number(config.antecedenciaHoras) } });
+      sucesso("Notificações salvas.");
     } catch (falhou) {
       erro.textContent = mensagemDeErro(falhou);
       erro.classList.remove("oculto");
@@ -212,19 +180,19 @@ function secaoLembretes(barbearia, modelos, gestor) {
   }
 
   return el("section", { class: "cartao cartao-corpo secao" }, [
-    el("h2", {}, "Lembrete automático por e-mail"),
+    el("h2", {}, "Notificações por e-mail"),
     el("p", { class: "suave pequeno", style: { margin: "4px 0 14px" } },
-      `Avisa cada ${T.cliente} sobre o horário, sem ninguém precisar abrir o sistema.`),
+      `Avisos automáticos para você e para os seus ${T.clientes}, sem ninguém precisar abrir o sistema.`),
 
     // Guardar a configuração não faz o e-mail sair. Dizer isso aqui evita
-    // a pior descoberta possível: a de quem confiou no lembrete e só
-    // percebeu que nada saiu quando o cliente não apareceu.
-    modoLocal
-      ? el("div", { class: "aviso aviso-info", style: { marginBottom: "14px" } }, [
-          el("strong", {}, "No modo local nada é enviado. "),
-          "A configuração fica guardada, mas o envio automático exige o Firebase com a função publicada.",
-        ])
-      : null,
+    // a pior descoberta: a de quem confiou no aviso e só percebeu que nada
+    // saiu quando o cliente não apareceu.
+    el("div", { class: "aviso aviso-info", style: { marginBottom: "14px" } }, [
+      el("strong", {}, "Os envios dependem do serviço de e-mail da plataforma. "),
+      modoLocal
+        ? "No modo local nada é enviado — a configuração só fica guardada."
+        : "Se nada estiver chegando, fale com a plataforma.",
+    ]),
 
     form,
   ]);

@@ -844,3 +844,12 @@
   font-weight: 500;
   text-align: right;
 }
+
+/* Tela de espera do painel: cadastro em análise, rejeitado ou falha ao
+   carregar. Centralizada e estreita — é um recado, não uma tela de
+   trabalho, e sem aprovação não há menu a mostrar ao lado. */
+.tela-espera {
+  max-width: 520px;
+  margin: 8vh auto 0;
+  text-align: center;
+}

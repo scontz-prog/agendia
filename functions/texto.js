@@ -33,11 +33,30 @@ export function agoraNoFuso(timeZone = "America/Sao_Paulo", agora = new Date()) 
     fmt.formatToParts(agora).map((x) => [x.type, x.value]),
   );
 
+  const hora = Number(p.hour) % 24; // "24" aparece à meia-noite em algumas engines
   return {
     dia: `${p.year}-${p.month}-${p.day}`,
-    // "24" aparece à meia-noite em algumas engines
-    hora: Number(p.hour) % 24,
+    hora,
+    minutos: hora * 60 + Number(p.minute),
   };
+}
+
+/** Dias corridos de `de` até `ate` ("2026-09-19" → "2026-09-20" = 1). */
+export function diasEntre(de, ate) {
+  const a = Date.UTC(...de.split("-").map((n, i) => Number(n) - (i === 1 ? 1 : 0)));
+  const b = Date.UTC(...ate.split("-").map((n, i) => Number(n) - (i === 1 ? 1 : 0)));
+  return Math.round((b - a) / 86400000);
+}
+
+/**
+ * Quantos minutos faltam, no relógio do estabelecimento, para um
+ * atendimento marcado em `dia` às `inicioMin`. Negativo se já passou.
+ *
+ * Tudo em hora local: o agendamento é gravado assim (dia + minutos desde
+ * a meia-noite), e `agora` vem de `agoraNoFuso` no fuso da conta.
+ */
+export function minutosAte(agora, dia, inicioMin) {
+  return diasEntre(agora.dia, dia) * 1440 + Number(inicioMin) - agora.minutos;
 }
 
 /**
@@ -124,5 +143,68 @@ export function valoresDo(agendamento, cliente, barbearia, link = "") {
     telefone_estabelecimento: telefoneFormatado(
       barbearia?.whatsapp || barbearia?.telefone,
     ),
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/* Textos padrão                                                       */
+/*                                                                     */
+/* Usados quando a conta não escolheu um modelo próprio. Sem nome de    */
+/* procedimento no assunto: em clínica, o assunto do e-mail aparece na  */
+/* tela bloqueada do celular de quem estiver por perto.                 */
+/* ------------------------------------------------------------------ */
+
+export const TEXTO_CONFIRMACAO = {
+  assunto: "Horário confirmado — {estabelecimento}",
+  texto: [
+    "Olá, {nome}!",
+    "",
+    "Seu horário na {estabelecimento} está marcado:",
+    "",
+    "{data} às {hora}",
+    "{servico} com {profissional}",
+    "",
+    "Se precisar cancelar ou remarcar, use o mesmo link em que você agendou " +
+      "ou fale com a gente pelo {telefone_estabelecimento}.",
+    "",
+    "{estabelecimento}",
+  ].join("\n"),
+};
+
+export const TEXTO_LEMBRETE = {
+  assunto: "Lembrete do seu horário — {estabelecimento}",
+  texto: [
+    "Olá, {nome}!",
+    "",
+    "Passando para lembrar do seu horário na {estabelecimento}:",
+    "",
+    "{data} às {hora}",
+    "{servico} com {profissional}",
+    "",
+    "Se não puder comparecer, avise pelo {telefone_estabelecimento}.",
+    "",
+    "{estabelecimento}",
+  ].join("\n"),
+};
+
+/** Aviso para o estabelecimento: vai para quem trabalha, então é direto. */
+export function textoAvisoEmpresa(a, barbearia) {
+  const quando = `${dataLonga(a.dia)} às ${minutosParaHora(a.inicioMin)}`;
+  return {
+    assunto: `Novo agendamento: ${a.clienteNome ?? "cliente"} — ${quando}`,
+    texto: [
+      `Novo agendamento pelo link de ${barbearia?.nome ?? "seu estabelecimento"}.`,
+      "",
+      `Cliente: ${a.clienteNome ?? "—"}`,
+      `Telefone: ${telefoneFormatado(a.clienteTelefone) || "—"}`,
+      `E-mail: ${a.clienteEmail ?? "—"}`,
+      "",
+      `${a.servicoNome ?? ""} com ${a.barbeiroNome ?? ""}`,
+      quando,
+      `Valor: ${moeda(a.precoCentavos)}`,
+      ...(a.observacoes ? ["", `Observação do cliente: ${a.observacoes}`] : []),
+      "",
+      "O atendimento já está na agenda do painel.",
+    ].join("\n"),
   };
 }

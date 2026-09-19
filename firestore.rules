@@ -96,12 +96,23 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/barbearias/$(bid)).data.ativa != false;
     }
 
+    // Conta só grava depois de APROVADA pela plataforma. Antes disso o
+    // dono entra e vê a tela de espera, mas não cria nada: o painel
+    // esconde as telas, e esta linha garante que ninguém contorne isso
+    // chamando o banco direto.
     function podeEscrever(bid) {
-      return daBarbearia(bid) && contaAtiva(bid);
+      return daBarbearia(bid) && contaAtiva(bid) && contaAprovada(bid);
     }
 
     function gestorAtivo(bid) {
-      return gestor(bid) && contaAtiva(bid);
+      return gestor(bid) && contaAtiva(bid) && contaAprovada(bid);
+    }
+
+    // Formato mínimo de e-mail. Não prova que a caixa existe — isso só o
+    // envio prova —, mas barra lixo e textos gigantes.
+    function emailOk(v) {
+      return v is string && v.size() <= 120
+             && v.matches('^[^@ ]+@[^@ ]+[.][^@ ]+$');
     }
 
     function texto(campo, minimo) {
@@ -288,6 +299,10 @@ service cloud.firestore {
                && servico.ativo == true
                && texto(d.clienteNome, 2)
                && texto(d.clienteTelefone, 10)
+               // minicadastro: nome, telefone e e-mail são obrigatórios
+               // no link público — o e-mail é por onde chegam a
+               // confirmação e o lembrete
+               && emailOk(d.clienteEmail)
                && d.barbeiroId is string
                && exists(
                     /databases/$(database)/documents/barbearias/$(bid)/barbeiros/$(d.barbeiroId)
@@ -323,17 +338,33 @@ service cloud.firestore {
         allow create: if podeEscrever(bid)
                       || (logado()
                           && contaAtiva(bid)
+                          && contaAprovada(bid)
                           && texto(request.resource.data.nome, 2)
                           && texto(request.resource.data.telefone, 10)
-                          && request.resource.data.telefone == telefone);
+                          && request.resource.data.telefone == telefone
+                          && (request.resource.data.get('email', null) == null
+                              || emailOk(request.resource.data.email)));
 
         // De fora, só o nome pode ser tocado — saber o telefone de
         // alguém não pode dar acesso a reescrever a ficha inteira.
+        //
+        // O e-mail entra de fora UMA vez: só quando a ficha ainda não tem
+        // nenhum. Se desse para trocar, quem soubesse o telefone de outra
+        // pessoa desviaria para si os lembretes dela — com data, horário e
+        // serviço. O agendamento guarda o e-mail informado naquela hora,
+        // e é esse que as notificações daquele agendamento usam.
         allow update: if podeEscrever(bid)
                       || (logado()
                           && contaAtiva(bid)
                           && request.resource.data.diff(resource.data)
-                               .affectedKeys().hasOnly(['nome']));
+                               .affectedKeys().hasOnly(['nome']))
+                      || (logado()
+                          && contaAtiva(bid)
+                          && contaAprovada(bid)
+                          && resource.data.get('email', null) == null
+                          && request.resource.data.diff(resource.data)
+                               .affectedKeys().hasOnly(['email'])
+                          && emailOk(request.resource.data.email));
 
         allow delete: if gestorAtivo(bid);
       }

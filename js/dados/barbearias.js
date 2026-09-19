@@ -159,15 +159,20 @@ export async function salvarHorarios(bid, horarios) {
 export async function salvarLembretes(bid, config) {
   exigirContaAtiva();
 
-  const hora = Number(config.horaEnvio);
-  const dias = Number(config.diasAntes);
+  const horas = Number(config.antecedenciaHoras);
+  const email = String(config.emailAvisos ?? "").trim().toLowerCase();
+  if (email && !/^[^@ ]+@[^@ ]+[.][^@ ]+$/.test(email)) {
+    throw new Error("O e-mail que recebe os avisos parece incompleto.");
+  }
 
   await updateDoc(refBarbearia(bid), {
     lembretes: {
+      confirmacaoCliente: config.confirmacaoCliente !== false,
+      avisoEmpresa: config.avisoEmpresa !== false,
+      emailAvisos: email || null,
       ativo: Boolean(config.ativo),
+      antecedenciaHoras: Number.isFinite(horas) ? Math.min(48, Math.max(1, horas)) : 2,
       modeloId: config.modeloId || null,
-      horaEnvio: Number.isFinite(hora) ? Math.min(23, Math.max(0, hora)) : 18,
-      diasAntes: Number.isFinite(dias) ? Math.min(7, Math.max(0, dias)) : 1,
       linkPublico: config.linkPublico ?? null,
       atualizadoEm: new Date().toISOString(),
     },

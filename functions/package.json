@@ -1,6 +1,6 @@
 {
   "name": "agendia-funcoes",
-  "description": "Envio automático de lembretes por e-mail do Agendia",
+  "description": "Notificações por e-mail do Agendia (confirmação, aviso à empresa e lembrete)",
   "type": "module",
   "engines": {
     "node": "22"
@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "firebase-admin": "^13.0.0",
-    "firebase-functions": "^6.0.0"
+    "firebase-functions": "^6.0.0",
+    "nodemailer": "^6.9.16"
   },
   "private": true
 }

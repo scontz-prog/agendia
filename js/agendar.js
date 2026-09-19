@@ -66,6 +66,7 @@ const estado = {
   horario: null,
   nome: "",
   telefone: "",
+  email: "",
   observacoes: "",
   enviando: false,
   erro: null,
@@ -327,6 +328,17 @@ function passoHorario() {
   );
 }
 
+/**
+ * Mesmo critério da regra do Firestore (`emailOk`): algo@algo.algo, sem
+ * espaço. Validar aqui igual ao banco evita o pior caso — o botão
+ * liberar e o servidor recusar, com uma mensagem que o cliente não
+ * entende.
+ */
+function emailValido(v) {
+  const t = String(v ?? "").trim();
+  return t.length <= 120 && /^[^@ ]+@[^@ ]+[.][^@ ]+$/.test(t);
+}
+
 /* --- 4. dados e confirmação --------------------------------------- */
 function passoDados() {
   const { servico, barbeiro, dia, horario } = estado;
@@ -358,6 +370,20 @@ function passoDados() {
     },
   });
 
+  const campoEmail = el("input", {
+    class: "campo",
+    id: "pub-email",
+    type: "email",
+    value: estado.email,
+    placeholder: "voce@exemplo.com",
+    autocomplete: "email",
+    inputmode: "email",
+    oninput: (e) => {
+      estado.email = e.target.value;
+      validar();
+    },
+  });
+
   const botao = el(
     "button",
     { class: "btn btn-primario btn-bloco", type: "button", disabled: true, onclick: confirmar },
@@ -366,7 +392,9 @@ function passoDados() {
 
   function validar() {
     botao.disabled =
-      estado.nome.trim().length < 2 || digitos(estado.telefone).length < 10;
+      estado.nome.trim().length < 2 ||
+      digitos(estado.telefone).length < 10 ||
+      !emailValido(estado.email);
   }
 
   async function confirmar() {
@@ -378,6 +406,7 @@ function passoDados() {
           estado.barbearia.id,
           estado.nome,
           estado.telefone,
+          estado.email,
         );
 
         idCriado = await criarAgendamento(estado.barbearia.id, {
@@ -388,6 +417,7 @@ function passoDados() {
           clienteId,
           clienteNome: estado.nome,
           clienteTelefone: estado.telefone,
+          clienteEmail: estado.email,
           observacoes: estado.observacoes,
           origem: "publico",
         });
@@ -419,6 +449,12 @@ function passoDados() {
     el("div", { class: "grupo" }, [
       el("label", { class: "rotulo", for: "pub-tel" }, "WhatsApp"),
       campoTel,
+    ]),
+    el("div", { class: "grupo" }, [
+      el("label", { class: "rotulo", for: "pub-email" }, "E-mail"),
+      campoEmail,
+      el("p", { class: "fraco pequeno", style: { marginTop: "6px" } },
+        "É por aqui que você recebe a confirmação e o lembrete do horário."),
     ]),
     el("div", { class: "grupo" }, [
       el("label", { class: "rotulo", for: "pub-obs" }, "Alguma observação? (opcional)"),

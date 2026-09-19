@@ -436,6 +436,8 @@ function abrirNovo(estado, barbeiroId, hora) {
           clienteId,
           clienteNome,
           clienteTelefone,
+          // cliente já cadastrado com e-mail na ficha recebe os avisos também
+          clienteEmail: clientes.find((c) => c.id === clienteId)?.email ?? null,
           observacoes: dados.observacoes,
           origem: "painel",
         });

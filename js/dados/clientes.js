@@ -75,14 +75,16 @@ export async function salvarCliente(bid, dados) {
  * para que alguém de fora não consiga sobrescrever a ficha de outra
  * pessoa apenas sabendo o telefone.
  */
-export async function registrarClientePublico(bid, nome, telefoneBruto) {
+export async function registrarClientePublico(bid, nome, telefoneBruto, emailBruto = null) {
   const telefone = digitos(telefoneBruto);
+  const email = String(emailBruto ?? "").trim().toLowerCase() || null;
   try {
     await setDoc(
       refCliente(bid, telefone),
       {
         nome: String(nome).trim(),
         telefone,
+        email,
         totalVisitas: 0,
         totalGastoCentavos: 0,
         ultimaVisitaDia: null,
@@ -92,6 +94,17 @@ export async function registrarClientePublico(bid, nome, telefoneBruto) {
     );
   } catch (erro) {
     if (erro?.code !== "permission-denied") throw erro;
+
+    // A ficha já existia. O e-mail só pode ser completado se ela ainda
+    // não tiver nenhum — a regra do Firestore recusa trocar um e-mail já
+    // gravado, para ninguém desviar para si os avisos de outra pessoa.
+    if (email) {
+      try {
+        await updateDoc(refCliente(bid, telefone), { email });
+      } catch (erro2) {
+        if (erro2?.code !== "permission-denied") throw erro2;
+      }
+    }
   }
   return telefone;
 }
