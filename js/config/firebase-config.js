@@ -15,7 +15,7 @@
  * A troca não exige mexer em mais nenhum arquivo: as duas
  * implementações expõem exatamente a mesma interface.
  */
-export const MODO = "local";
+export const MODO = "firebase";
 
 /**
  * Credenciais do projeto Firebase — só usadas quando MODO = "firebase".
@@ -29,12 +29,12 @@ export const MODO = "local";
  * sigilo destas chaves. Nunca coloque aqui chave de conta de serviço.
  */
 export const firebaseConfig = {
-  apiKey: "COLE_SUA_API_KEY",
-  authDomain: "SEU-PROJETO.firebaseapp.com",
-  projectId: "SEU-PROJETO",
-  storageBucket: "SEU-PROJETO.firebasestorage.app",
-  messagingSenderId: "000000000000",
-  appId: "1:000000000000:web:0000000000000000000000",
+  apiKey: "AIzaSyABJ8vroJh3V--Lf_zY-XSviR5SEWGTPzs",
+  authDomain: "agendia-5dfef.firebaseapp.com",
+  projectId: "agendia-5dfef",
+  storageBucket: "agendia-5dfef.firebasestorage.app",
+  messagingSenderId: "852610822488",
+  appId: "1:852610822488:web:954c06b9c754d461b6752d",
 };
 
 /** Versão do SDK carregada do CDN do Google (modo "firebase"). */
