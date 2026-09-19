@@ -1,0 +1,14 @@
+# Normaliza a quebra de linha para LF dentro do repositório.
+#
+# Sem isto, o Git avisa a cada `add` que vai converter CRLF, e qualquer
+# arquivo tocado no Windows aparece no diff como se TODAS as linhas
+# tivessem mudado — o que esconde a alteração real no meio do ruído.
+* text=auto eol=lf
+
+# Arquivos do Windows continuam com CRLF: o .bat precisa disso.
+*.bat text eol=crlf
+
+# Binários não são texto e não devem ser convertidos nem "diffados".
+*.png binary
+*.webp binary
+*.woff2 binary
