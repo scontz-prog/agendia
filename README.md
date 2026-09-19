@@ -739,11 +739,17 @@ ocupando meia hora. Durações múltiplas de 15 aproveitam melhor a agenda.
 
 ## Limites conhecidos
 
-1. **Spam no link público.** Um visitante anônimo pode criar agendamentos em
-   série e sujar a agenda. As regras validam preço, duração, serviço e
-   barbeiro, mas não têm como limitar frequência. A defesa certa é ativar o
-   **Firebase App Check** (reCAPTCHA v3) antes de divulgar o link em escala —
-   é configuração de console, não exige mudar o código.
+1. **Spam no link público — App Check ligado, mas ainda NÃO aplicado.**
+   Desde 19/09/2026 o site tira um comprovante do reCAPTCHA Enterprise a cada
+   hora (`APP_CHECK_SITE_KEY` em `firebase-config.js`) e o Firebase já
+   registra quais pedidos chegam verificados. Enquanto não for **aplicado**
+   em App Check › APIs › Cloud Firestore, o banco ainda aceita pedidos sem
+   comprovante. Aplicar **só no Firestore**, depois de alguns dias vendo
+   perto de 100% verificados — aplicar no Authentication quebraria a
+   criação de logins de funcionário (a instância secundária não carrega o
+   App Check). O reCAPTCHA v3 comum foi descontinuado pelo Google: é o
+   Enterprise, e ele não tem chave secreta — a chave precisa existir no
+   mesmo projeto do Google Cloud do Firebase.
 2. **Nada é enviado automaticamente.** A central de mensagens monta o texto e
    abre o WhatsApp ou o e-mail; quem aperta enviar é a pessoa. Lembrete
    automático, agendado ou recorrente exige um serviço rodando fora do
