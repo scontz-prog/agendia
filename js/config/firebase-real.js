@@ -39,13 +39,37 @@ import {
   Timestamp,
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
-import { firebaseConfig } from "./firebase-config.js";
+import { firebaseConfig, APP_CHECK_SITE_KEY } from "./firebase-config.js";
 
 const app = initializeApp(firebaseConfig);
+
+/*
+ * App Check ANTES de qualquer outro serviço: os pedidos ao Firestore só
+ * levam o comprovante se ele já estiver ativo quando o banco é aberto.
+ *
+ * Só na instância principal, de propósito. A secundária (criar login de
+ * funcionário) fala apenas com o Authentication — e o App Check deve ser
+ * aplicado só no Firestore, que é onde está o risco real: agendamento
+ * falso pelo link público.
+ */
+if (APP_CHECK_SITE_KEY) {
+  const { initializeAppCheck, ReCaptchaV3Provider } = await import(
+    "https://www.gstatic.com/firebasejs/12.17.1/firebase-app-check.js"
+  );
+  initializeAppCheck(app, {
+    provider: new ReCaptchaV3Provider(APP_CHECK_SITE_KEY),
+    isTokenAutoRefreshEnabled: true,
+  });
+}
 
 export const modoLocal = false;
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+
+// E-mails do Firebase (redefinição de senha) em português. Sem isto eles
+// saem no idioma padrão do projeto, inglês — e é o dono de um salão quem
+// recebe quando esquece a senha.
+auth.languageCode = "pt-BR";
 
 /** No modo Firebase os dados são do servidor: não há o que resetar daqui. */
 export function resetarDados() {
