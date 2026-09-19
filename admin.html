@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0B3D2E" />
+    <title>Administração — Agendia</title>
+    <meta name="robots" content="noindex" />
+    <link rel="icon" type="image/png" href="assets/favicon.png" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/componentes.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/admin.css" />
+  </head>
+
+  <body>
+    <div class="app-admin">
+      <header class="topo-admin">
+        <div class="envolucro">
+          <span class="marca">
+            <span class="marca-agendia" style="--marca-altura: 42px">
+              <img src="assets/agendia-simbolo.webp" alt="" />
+              <span class="marca-agendia-texto">
+                <span class="marca-agendia-nome">AGENDIA</span>
+                <span class="marca-agendia-lema">Organização e tempo</span>
+              </span>
+            </span>
+            <span class="etiqueta etiqueta-neutra">administração</span>
+          </span>
+          <div class="linha">
+            <span id="admin-usuario" class="pequeno fraco truncar"></span>
+            <button class="btn btn-sair" data-sair type="button">
+              <span aria-hidden="true">&#9211;</span>
+              <span>Sair da conta</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main id="conteudo" class="envolucro conteudo-admin">
+        <div class="carregando"><div class="girando"></div>Carregando…</div>
+      </main>
+    </div>
+
+    <script type="module">
+      import("./js/admin.js").catch((erro) => {
+        console.error(erro);
+        document.getElementById("conteudo").innerHTML =
+          '<div class="aviso aviso-erro">Não foi possível carregar a administração. ' +
+          "Verifique sua conexão e o console do navegador.</div>";
+      });
+    </script>
+  </body>
+</html>

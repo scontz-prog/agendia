@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#062A20" />
+    <title>Agendia — agenda e gestão para empresas de serviços</title>
+    <meta
+      name="description"
+      content="Agenda online com link próprio, ficha de clientes e painel de gestão. Para salões, clínicas, consultórios, estúdios, barbearias e profissionais autônomos."
+    />
+    <link rel="icon" type="image/png" href="assets/favicon.png" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/componentes.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+  </head>
+
+  <body>
+    <header class="topo-site">
+      <div class="envolucro">
+        <a class="marca-agendia" href="index.html" style="--marca-altura: 40px">
+          <img src="assets/agendia-simbolo.webp" alt="" />
+          <span class="marca-agendia-texto">
+            <span class="marca-agendia-nome">AGENDIA</span>
+            <span class="marca-agendia-lema">Organização e tempo</span>
+          </span>
+        </a>
+        <nav class="linha">
+          <a class="btn btn-fantasma" href="entrar.html">Entrar</a>
+          <a class="btn btn-primario" href="entrar.html#criar">Criar conta</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="envolucro heroi">
+        <!-- sem --marca-altura inline: o tamanho é fluido no CSS
+             (.marca-heroi), e um valor aqui venceria o clamp -->
+        <span class="marca-agendia empilhada marca-heroi">
+          <img src="assets/agendia-simbolo.webp" alt="" />
+          <span class="marca-agendia-texto">
+            <span class="marca-agendia-nome">AGENDIA</span>
+            <span class="marca-agendia-lema">Organização e tempo</span>
+          </span>
+        </span>
+        <p class="selo">Agenda e gestão para empresas de serviços</p>
+        <h1>A agenda cheia e as contas na ponta do lápis.</h1>
+        <p>
+          Agendamento online com link próprio, controle de profissionais e
+          serviços, e um painel que mostra quanto o seu negócio realmente
+          faturou.
+        </p>
+        <div class="heroi-acoes">
+          <a class="btn btn-primario" href="entrar.html#criar">Começar agora</a>
+          <a class="btn btn-secundario" href="entrar.html">Já sou cliente</a>
+        </div>
+
+        <!-- Dizer "para qualquer segmento" é afirmação; mostrar a lista é
+             prova. O sistema realmente troca o vocabulário conforme o que
+             for escolhido no cadastro. -->
+        <ul class="segmentos-atendidos">
+          <li><span aria-hidden="true">💇</span> Salões de beleza</li>
+          <li><span aria-hidden="true">🩺</span> Clínicas e consultórios</li>
+          <li><span aria-hidden="true">✨</span> Estúdios de estética</li>
+          <li><span aria-hidden="true">💈</span> Barbearias</li>
+          <li><span aria-hidden="true">🗓️</span> Autônomos e prestadores</li>
+        </ul>
+      </section>
+
+      <section class="envolucro recursos">
+        <article class="cartao recurso">
+          <span class="icone" aria-hidden="true">🗓️</span>
+          <h2>Agenda por profissional</h2>
+          <p>
+            Grade de horário × profissional. Dois clientes não conseguem pegar
+            o mesmo horário: quem chega em segundo recebe recusa do banco de
+            dados, não um aviso de tela que dá para burlar.
+          </p>
+        </article>
+
+        <article class="cartao recurso">
+          <span class="icone" aria-hidden="true">🔗</span>
+          <h2>Link próprio de agendamento</h2>
+          <p>
+            Cada empresa recebe um endereço para colocar no Instagram e no
+            WhatsApp. O cliente agenda sem instalar aplicativo nenhum.
+          </p>
+        </article>
+
+        <article class="cartao recurso">
+          <span class="icone" aria-hidden="true">👥</span>
+          <h2>Ficha de clientes</h2>
+          <p>
+            Histórico de atendimentos, telefone e observações. Saiba quem não
+            aparece há mais de 30 dias e chame de volta.
+          </p>
+        </article>
+
+        <article class="cartao recurso">
+          <span class="icone" aria-hidden="true">💰</span>
+          <h2>Faturamento e comissão</h2>
+          <p>
+            Preço e comissão ficam congelados no agendamento. Reajustar a tabela
+            de preços não reescreve o faturamento dos meses anteriores.
+          </p>
+        </article>
+
+        <article class="cartao recurso">
+          <span class="icone" aria-hidden="true">📊</span>
+          <h2>Painel de gestão</h2>
+          <p>
+            Números do dia e do mês: atendimentos, faturamento, ticket médio,
+            serviço mais vendido e ranking de profissionais.
+          </p>
+        </article>
+
+        <article class="cartao recurso">
+          <span class="icone" aria-hidden="true">📱</span>
+          <h2>Feito para o celular</h2>
+          <p>
+            A tela principal do dono é o telefone, entre um atendimento e
+            outro. Tudo foi desenhado primeiro para o celular e depois
+            esticado para o desktop.
+          </p>
+        </article>
+
+        <article class="cartao recurso">
+          <span class="icone" aria-hidden="true">🏷️</span>
+          <h2>Fala a língua do seu negócio</h2>
+          <p>
+            Você escolhe o segmento no cadastro e o sistema inteiro se ajusta.
+            Numa clínica o menu diz “Especialistas”, “Procedimentos” e
+            “Pacientes”, e a tela de fechamento pergunta se o paciente veio.
+          </p>
+        </article>
+      </section>
+    </main>
+
+    <footer class="rodape-site">
+      <div class="envolucro entre">
+        <span>Agendia — organização e tempo.</span>
+        <a class="pequeno fraco acesso-plataforma" href="admin-entrar.html" rel="nofollow">Área da plataforma</a>
+      </div>
+    </footer>
+  </body>
+</html>

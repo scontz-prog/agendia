@@ -1,0 +1,952 @@
+/* =====================================================================
+   componentes.css — peças reutilizáveis
+   Alvos de toque com no mínimo 44px, porque a tela principal é o celular.
+   ===================================================================== */
+
+/* ---------------------------------------------------------------- */
+/* botões                                                            */
+/* ---------------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 18px;
+  border-radius: var(--raio-sm);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s,
+    opacity 0.15s;
+  white-space: nowrap;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primario {
+  background: var(--destaque);
+  color: var(--destaque-contraste);
+}
+
+.btn-primario:not(:disabled):hover {
+  background: var(--destaque-claro);
+}
+
+.btn-secundario {
+  background: var(--superficie-2);
+  border: 1px solid var(--borda);
+  color: var(--texto);
+}
+
+.btn-secundario:not(:disabled):hover {
+  background: var(--superficie-3);
+  border-color: var(--borda-forte);
+}
+
+.btn-fantasma {
+  color: var(--texto-suave);
+}
+
+.btn-fantasma:not(:disabled):hover {
+  background: var(--superficie-2);
+  color: var(--texto);
+}
+
+/* Sair precisa ser achado sem procurar, e a aparência tem que dizer
+   "isto encerra a sessão" antes da leitura. Contorno vermelho faz isso
+   sem gritar como um botão sólido faria numa barra que fica na tela o
+   dia inteiro — e vermelho, não laranja: o laranja é a cor de AÇÃO da
+   interface, e sair não é a ação que se quer convidar. */
+.btn-sair {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 8px 16px;
+  border: 1px solid color-mix(in srgb, var(--erro) 55%, transparent);
+  border-radius: var(--raio-sm);
+  background: color-mix(in srgb, var(--erro) 14%, transparent);
+  color: var(--erro);
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition:
+    background-color 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+}
+
+.btn-sair:hover {
+  background: var(--erro);
+  border-color: var(--erro);
+  color: #2a0808;
+}
+
+.btn-perigo {
+  background: color-mix(in srgb, var(--erro) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--erro) 30%, transparent);
+  color: var(--erro);
+}
+
+.btn-perigo:not(:disabled):hover {
+  background: color-mix(in srgb, var(--erro) 20%, transparent);
+}
+
+.btn-bloco {
+  width: 100%;
+}
+
+.btn-mini {
+  min-height: 34px;
+  padding: 4px 10px;
+  font-size: 0.8125rem;
+}
+
+/* ---------------------------------------------------------------- */
+/* formulários                                                       */
+/* ---------------------------------------------------------------- */
+.campo {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-sm);
+  background: var(--superficie-2);
+  /* 16px evita o zoom automático do Safari no iPhone ao focar o campo */
+  font-size: 1rem;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.campo::placeholder {
+  color: var(--texto-fraco);
+}
+
+.campo:focus {
+  outline: none;
+  border-color: var(--destaque);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--destaque) 20%, transparent);
+}
+
+.campo:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+textarea.campo {
+  min-height: 88px;
+  resize: vertical;
+}
+
+select.campo {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--texto-suave) 50%),
+    linear-gradient(135deg, var(--texto-suave) 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) 50%,
+    calc(100% - 13px) 50%;
+  background-size:
+    5px 5px,
+    5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 34px;
+}
+
+.rotulo {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--texto-suave);
+}
+
+.grupo {
+  margin-bottom: 16px;
+}
+
+.dupla {
+  display: grid;
+  gap: 16px;
+}
+
+@media (min-width: 480px) {
+  .dupla {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.marcador {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font-size: 0.9375rem;
+}
+
+.marcador input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--destaque);
+  flex-shrink: 0;
+}
+
+/* ---------------------------------------------------------------- */
+/* cartões e listas                                                  */
+/* ---------------------------------------------------------------- */
+.cartao {
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+}
+
+.cartao-corpo {
+  padding: 16px;
+}
+
+.secao {
+  margin-bottom: 28px;
+}
+
+.secao-titulo {
+  margin-bottom: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--texto-suave);
+}
+
+.lista {
+  list-style: none;
+}
+
+.lista > li + li {
+  border-top: 1px solid color-mix(in srgb, var(--borda) 60%, transparent);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  text-align: left;
+}
+
+.vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 48px 20px;
+  border: 1px dashed var(--borda);
+  border-radius: var(--raio);
+  text-align: center;
+}
+
+.vazio p {
+  color: var(--texto-suave);
+  font-size: 0.9375rem;
+  max-width: 34ch;
+}
+
+.vazio strong {
+  color: var(--texto);
+  font-weight: 500;
+}
+
+/* ---------------------------------------------------------------- */
+/* indicadores do dashboard                                          */
+/* ---------------------------------------------------------------- */
+.indicadores {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+@media (min-width: 720px) {
+  .indicadores {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.indicador {
+  padding: 14px;
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+}
+
+.indicador dt {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--texto-suave);
+}
+
+.indicador dd {
+  margin-top: 6px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.indicador dd.destaque {
+  color: var(--destaque);
+}
+
+.indicador .detalhe {
+  margin-top: 2px;
+  font-size: 0.75rem;
+  color: var(--texto-fraco);
+}
+
+/* ---------------------------------------------------------------- */
+/* etiquetas                                                         */
+/* ---------------------------------------------------------------- */
+.etiqueta {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.etiqueta-agendado {
+  background: color-mix(in srgb, var(--alerta) 15%, transparent);
+  color: var(--alerta);
+}
+.etiqueta-confirmado {
+  background: color-mix(in srgb, var(--info) 15%, transparent);
+  color: var(--info);
+}
+.etiqueta-realizado {
+  background: color-mix(in srgb, var(--sucesso) 15%, transparent);
+  color: var(--sucesso);
+}
+.etiqueta-cancelado {
+  background: color-mix(in srgb, var(--erro) 15%, transparent);
+  color: var(--erro);
+}
+.etiqueta-faltou {
+  background: color-mix(in srgb, var(--texto-suave) 20%, transparent);
+  color: var(--texto-suave);
+}
+.etiqueta-neutra {
+  background: color-mix(in srgb, var(--texto-suave) 20%, transparent);
+  color: var(--texto-suave);
+}
+
+.etiqueta-pendente {
+  background: color-mix(in srgb, var(--erro) 18%, transparent);
+  color: var(--erro);
+}
+
+/* ---------------------------------------------------------------- */
+/* fechamento do atendimento (Visão geral)                           */
+/*                                                                   */
+/* Enquanto ninguém disser se o cliente veio, a linha fica vermelha.  */
+/* A cor é o lembrete: o que não é fechado não entra no faturamento.  */
+/* ---------------------------------------------------------------- */
+.linha-pendente {
+  background: color-mix(in srgb, var(--erro) 7%, transparent);
+  box-shadow: inset 3px 0 0 var(--erro);
+}
+
+/* ------------------------------------------------------------------ */
+/* Central de mensagens                                                */
+/* ------------------------------------------------------------------ */
+
+/* A prévia imita o balão do WhatsApp de propósito: quem escreve precisa
+   ver as quebras de linha e o comprimento reais antes de disparar para
+   trinta pessoas. `pre-wrap` é o que preserva os parágrafos do modelo. */
+.previa-mensagem {
+  padding: 12px 14px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-sm);
+  background: var(--superficie-2);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--texto-suave);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.caixa-selecao {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  accent-color: var(--destaque);
+  cursor: pointer;
+}
+
+/* Variáveis clicáveis: escrever {nome} à mão é onde nascem o {Nome} e o
+   {nome } que não funcionam e ninguém entende por quê. */
+.variaveis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip-variavel {
+  padding: 5px 10px;
+  border: 1px solid var(--borda);
+  border-radius: 999px;
+  background: var(--superficie-2);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+  color: var(--destaque);
+  cursor: pointer;
+}
+
+.chip-variavel:hover {
+  border-color: var(--destaque);
+  background: color-mix(in srgb, var(--destaque) 12%, transparent);
+}
+
+/* Campo que só mostra. Guarda a altura e o alinhamento de um `.campo`
+   real para a linha não desmontar ao lado dos que são editáveis, mas sem
+   fingir que aceita digitação. */
+.campo-leitura {
+  display: flex;
+  align-items: center;
+  min-height: 46px;
+  margin: 0;
+  background: color-mix(in srgb, var(--superficie-2) 60%, transparent);
+  color: var(--texto-suave);
+  cursor: default;
+}
+
+/* Sem telefone (ou sem e-mail, conforme o canal) a linha continua
+   visível, mas apagada: sumir com ela faria a conta não bater com o
+   total, e a pessoa procuraria um cliente que "desapareceu". */
+.linha-inalcancavel {
+  opacity: 0.45;
+}
+
+.linha-inalcancavel .caixa-selecao {
+  cursor: not-allowed;
+}
+
+/* Barra de envio grudada no rodapé: a lista de clientes é longa, e um
+   botão no fim dela obrigaria a rolar tudo de volta para disparar. */
+.barra-envio {
+  position: sticky;
+  bottom: 0;
+  z-index: 15;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-sm);
+  background: var(--superficie);
+  box-shadow: 0 -6px 20px rgb(0 0 0 / 0.25);
+}
+
+@media (max-width: 899px) {
+  /* no celular a navegação inferior já ocupa o rodapé; a barra sobe para
+     não ficar embaixo dela — `--barra-inferior` é a mesma variável que o
+     `.app-conteudo` usa para reservar esse espaço */
+  .barra-envio {
+    bottom: calc(var(--barra-inferior) + 8px + env(safe-area-inset-bottom));
+  }
+}
+
+.fechamento {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 16px 14px;
+}
+
+.fechamento .pergunta {
+  font-size: 0.8125rem;
+  color: var(--texto-suave);
+  margin-right: 2px;
+}
+
+.fechamento .btn {
+  flex: 1 1 auto;
+  min-width: 120px;
+}
+
+@media (min-width: 560px) {
+  .fechamento .btn {
+    flex: 0 0 auto;
+  }
+}
+
+/* ---------------------------------------------------------------- */
+/* avisos                                                            */
+/* ---------------------------------------------------------------- */
+.aviso {
+  padding: 10px 12px;
+  border: 1px solid;
+  border-radius: var(--raio-sm);
+  font-size: 0.875rem;
+}
+
+.aviso-erro {
+  border-color: color-mix(in srgb, var(--erro) 30%, transparent);
+  background: color-mix(in srgb, var(--erro) 10%, transparent);
+  color: var(--erro);
+}
+
+.aviso-sucesso {
+  border-color: color-mix(in srgb, var(--sucesso) 30%, transparent);
+  background: color-mix(in srgb, var(--sucesso) 10%, transparent);
+  color: var(--sucesso);
+}
+
+.aviso-info {
+  border-color: color-mix(in srgb, var(--info) 30%, transparent);
+  background: color-mix(in srgb, var(--info) 10%, transparent);
+  color: var(--info);
+}
+
+/* ---------------------------------------------------------------- */
+/* modal — folha deslizante no celular, caixa central no desktop     */
+/* ---------------------------------------------------------------- */
+.modal[hidden] {
+  display: none;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.modal-fundo {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 0.65);
+}
+
+.modal-caixa {
+  position: relative;
+  width: 100%;
+  max-height: 92dvh;
+  overflow-y: auto;
+  padding: 20px;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: 18px 18px 0 0;
+  animation: subir 0.2s ease-out;
+}
+
+@keyframes subir {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+}
+
+.modal-topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.modal-fechar {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--raio-sm);
+  color: var(--texto-suave);
+  font-size: 1.125rem;
+}
+
+.modal-fechar:hover {
+  background: var(--superficie-2);
+  color: var(--texto);
+}
+
+.modal-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.modal-acoes .btn {
+  flex: 1;
+  min-width: 120px;
+}
+
+@media (min-width: 640px) {
+  .modal {
+    align-items: center;
+  }
+
+  .modal-caixa {
+    max-width: 520px;
+    border-radius: 18px;
+  }
+}
+
+/* ---------------------------------------------------------------- */
+/* toast                                                             */
+/* ---------------------------------------------------------------- */
+.toasts {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: calc(var(--barra-inferior) + 12px + env(safe-area-inset-bottom));
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  padding: 12px 14px;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--raio-sm);
+  background: var(--superficie-3);
+  font-size: 0.875rem;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.4);
+  animation: subir 0.2s ease-out;
+}
+
+.toast-erro {
+  border-color: color-mix(in srgb, var(--erro) 40%, transparent);
+  color: var(--erro);
+}
+
+.toast-sucesso {
+  border-color: color-mix(in srgb, var(--sucesso) 40%, transparent);
+  color: var(--sucesso);
+}
+
+@media (min-width: 900px) {
+  .toasts {
+    left: auto;
+    right: 20px;
+    bottom: 20px;
+    width: 340px;
+  }
+}
+
+/* ---------------------------------------------------------------- */
+/* marca Agendia                                                     */
+/*                                                                   */
+/* O logotipo deixou de ser imagem. Só o desenho (caderno + relógio) */
+/* vem de arquivo; "AGENDIA" e o lema são TEXTO. Três ganhos: fica   */
+/* nítido em qualquer tamanho sem exportar variação nenhuma, a cor   */
+/* muda com uma linha de CSS — foi assim que virou prata — e o nome  */
+/* do produto passa a ser conteúdo de verdade para leitor de tela.   */
+/*                                                                   */
+/* Uma variável comanda o conjunto: mude --marca-altura e desenho,   */
+/* nome e lema crescem juntos, sem desalinhar.                       */
+/* ---------------------------------------------------------------- */
+.marca-agendia {
+  --marca-altura: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--marca-altura) * 0.24);
+  text-decoration: none;
+  color: inherit;
+  line-height: 1;
+}
+
+.marca-agendia:hover {
+  text-decoration: none;
+}
+
+.marca-agendia img {
+  height: var(--marca-altura);
+  width: auto;
+  flex-shrink: 0;
+}
+
+.marca-agendia-texto {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--marca-altura) * 0.11);
+  min-width: 0;
+}
+
+/* O NOME É OFF-WHITE, NÃO LARANJA.
+   O laranja é a cor de ação da interface: gasto no logotipo, que aparece
+   em toda tela, ele deixaria de significar "clique aqui" e a tela ficaria
+   carregada. O nome fica em off-white — que sobre verde escuro tem
+   presença de sobra — e o laranja se reserva ao lema, em dose pequena. */
+.marca-agendia-nome {
+  font-family: "Outfit", var(--fonte);
+  font-size: calc(var(--marca-altura) * 0.5);
+  font-weight: 500;
+  letter-spacing: 0.19em;
+  /* A entreletra abre um vão à direita da última letra, e esse vão entra
+     na largura da caixa — centralizar a caixa deixaria as letras à
+     esquerda do desenho. Puxar de volta resolve, mas o valor tem que ser
+     em `em`, igual ao da entreletra: em `--marca-altura` puxava o dobro,
+     porque a fonte é metade da altura da marca. */
+  margin-right: -0.19em;
+  text-transform: uppercase;
+  line-height: 1;
+  white-space: nowrap;
+
+  /* cor sólida como base: se o navegador não recortar o gradiente no
+     texto, o nome sai off-white mesmo assim — nunca invisível */
+  color: var(--texto);
+}
+
+@supports (-webkit-background-clip: text) or (background-clip: text) {
+  .marca-agendia-nome {
+    background: linear-gradient(180deg, #ffffff 0%, #eef5f1 45%, #c3d8ce 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+.marca-agendia-lema {
+  font-family: "Outfit", var(--fonte);
+  font-size: calc(var(--marca-altura) * 0.155);
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  margin-right: -0.28em; /* mesma compensação do nome, ver acima */
+  text-transform: uppercase;
+  color: var(--destaque);
+  white-space: nowrap;
+}
+
+/* Empilhada: desenho em cima, nome embaixo — vitrine e login. */
+.marca-agendia.empilhada {
+  flex-direction: column;
+  gap: calc(var(--marca-altura) * 0.2);
+  text-align: center;
+}
+
+.marca-agendia.empilhada img {
+  height: calc(var(--marca-altura) * 1.9);
+}
+
+.marca-agendia.empilhada .marca-agendia-texto {
+  align-items: center;
+}
+
+/* Só o desenho — para cantos apertados. */
+.marca-agendia.so-simbolo {
+  gap: 0;
+}
+
+.marca-agendia.so-simbolo .marca-agendia-texto {
+  display: none;
+}
+
+/* ---------------------------------------------------------------- */
+/* marcas de barbearia e avatares                                    */
+/* ---------------------------------------------------------------- */
+
+/* Logo da barbearia: altura mandando, largura livre. Logos vêm em
+   proporções imprevisíveis — travar a largura amassaria as horizontais. */
+.logo-barbearia {
+  max-width: 100%;
+  width: auto;
+  object-fit: contain;
+}
+
+.nome-barbearia {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* Marca da plataforma em posição secundária: presente, não protagonista. */
+.marca-canto {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0.85;
+  transition: opacity 0.15s;
+}
+
+.marca-canto:hover {
+  opacity: 1;
+  text-decoration: none;
+}
+
+.assinatura-agendia {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-top: 36px;
+  opacity: 0.55;
+  transition: opacity 0.15s;
+}
+
+.assinatura-agendia:hover {
+  opacity: 0.9;
+}
+
+.assinatura-agendia span {
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--texto-fraco);
+}
+
+.assinatura-agendia img {
+  height: 24px;
+  width: auto;
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid var(--borda-forte);
+  object-fit: cover;
+  background: var(--superficie-2);
+}
+
+.avatar-iniciais {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+
+/* ---------------------------------------------------------------- */
+/* envio de imagem                                                   */
+/* ---------------------------------------------------------------- */
+.envio {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.envio-previa {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 104px;
+  height: 72px;
+  padding: 6px;
+  border: 1px dashed var(--borda);
+  border-radius: var(--raio-sm);
+  background: var(--superficie-2);
+  overflow: hidden;
+}
+
+.envio-previa.redonda {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+}
+
+.envio-previa img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.envio-previa.redonda img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.envio-previa .vazia {
+  font-size: 0.6875rem;
+  color: var(--texto-fraco);
+  text-align: center;
+  padding: 0 6px;
+}
+
+.envio-controles {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+
+.envio-controles .linha-botoes {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.envio-dica {
+  font-size: 0.75rem;
+  color: var(--texto-fraco);
+}
+
+/* input[type=file] nativo é feio e não estiliza; escondemos e acionamos
+   pelo botão, que herda a aparência do resto do sistema */
+.envio input[type="file"] {
+  display: none;
+}
+
+/* ---------------------------------------------------------------- */
+/* selo do modo local                                                */
+/* ---------------------------------------------------------------- */
+/* Faixa no fluxo normal, no topo da página. Já foi um selo flutuante no
+   canto e ele cobria o botão "Sair" dos cabeçalhos — uma tarja de largura
+   inteira não tem como colidir com nada. */
+.selo-local {
+  padding: 4px 12px;
+  background: var(--alerta);
+  color: #241a00;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-align: center;
+  user-select: none;
+}
+
+/* ---------------------------------------------------------------- */
+/* carregando                                                        */
+/* ---------------------------------------------------------------- */
+.girando {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--borda-forte);
+  border-top-color: var(--destaque);
+  border-radius: 50%;
+  animation: girar 0.7s linear infinite;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.carregando {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 40px;
+  color: var(--texto-suave);
+  font-size: 0.875rem;
+}

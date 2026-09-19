@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#062A20" />
+    <title>Entrar — Agendia</title>
+    <link rel="icon" type="image/png" href="assets/favicon.png" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/componentes.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+  </head>
+
+  <body>
+    <main class="tela-auth">
+      <div class="caixa-auth">
+        <a class="marca-agendia empilhada marca-auth" href="index.html" style="--marca-altura: 54px">
+          <img src="assets/agendia-simbolo.webp" alt="" />
+          <span class="marca-agendia-texto">
+            <span class="marca-agendia-nome">AGENDIA</span>
+            <span class="marca-agendia-lema">Organização e tempo</span>
+          </span>
+        </a>
+
+        <!-- "estabelecimento" e não "barbearia": esta porta serve
+             clínica, salão e o que mais vier. -->
+        <p class="faixa-area">Área do estabelecimento</p>
+
+        <div id="conteudo" class="cartao cartao-corpo">
+          <div class="carregando"><div class="girando"></div>Carregando…</div>
+        </div>
+
+        <!-- atalhos do modo local; fica vazio no modo Firebase -->
+        <div id="extra"></div>
+
+        <p id="rodape" class="rodape-auth"></p>
+
+        <p class="rodape-auth">
+          <a class="pequeno fraco" href="admin-entrar.html">Acesso da administração</a>
+        </p>
+      </div>
+    </main>
+
+    <!-- Se o módulo não carregar (sem internet, CDN bloqueado, config
+         faltando), a página não pode ficar em branco sem explicação. -->
+    <script type="module">
+      import("./js/entrar.js").catch((erro) => {
+        console.error(erro);
+        document.getElementById("conteudo").innerHTML =
+          '<div class="aviso aviso-erro">Não foi possível carregar o sistema. ' +
+          "Verifique sua conexão e se o arquivo <code>js/config/firebase-config.js</code> " +
+          "foi preenchido.</div>";
+      });
+    </script>
+  </body>
+</html>

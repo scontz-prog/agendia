@@ -1,0 +1,454 @@
+rules_version = '2';
+
+// =====================================================================
+// Regras do Firestore — Agendia
+//
+// Num site estático não existe backend próprio: qualquer pessoa pode
+// abrir o console do navegador e chamar o Firestore direto com a chave
+// pública. Portanto ESTE ARQUIVO é a segurança do sistema. O que não
+// estiver escrito aqui não está protegido.
+//
+// Três fronteiras são impostas aqui, e não no JavaScript:
+//   1. uma barbearia nunca lê nem escreve dados de outra;
+//   2. um horário já reservado não pode ser sobrescrito;
+//   3. o administrador da plataforma administra CONTAS, não dados de
+//      clientes — ele não consegue ler agenda nem carteira de ninguém.
+//
+// Publicar:  firebase deploy --only firestore:rules
+// Ou colar em: Console do Firebase › Firestore Database › Regras
+// =====================================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /* ------------------------------------------------------------- */
+    /* Ajudantes                                                      */
+    /* ------------------------------------------------------------- */
+
+    function logado() {
+      return request.auth != null;
+    }
+
+    function perfil() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data;
+    }
+
+    function temPerfil() {
+      return logado() &&
+             exists(/databases/$(database)/documents/usuarios/$(request.auth.uid));
+    }
+
+    function daBarbearia(bid) {
+      return temPerfil() && perfil().barbeariaId == bid;
+    }
+
+    function gestor(bid) {
+      return daBarbearia(bid) && perfil().papel in ['dono', 'gerente'];
+    }
+
+    // Distribuir acesso é privilégio de dono. Se o gerente pudesse, ele
+    // criaria um login com o alcance que quisesse — inclusive para si.
+    function dono(bid) {
+      return daBarbearia(bid) && perfil().papel == 'dono';
+    }
+
+    // Administrador da plataforma: quem tem documento em `admins`.
+    // O PRIMEIRO desses documentos é criado à mão no console do Firebase.
+    // Depois dele, só um administrador principal cria outros — e nunca
+    // outro principal, que continua sendo decisão de console.
+    function ehAdmin() {
+      return logado() &&
+             exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function fichaAdmin() {
+      return get(/databases/$(database)/documents/admins/$(request.auth.uid)).data;
+    }
+
+    function ehAdminPrincipal() {
+      return ehAdmin() && fichaAdmin().get('principal', false) == true;
+    }
+
+    // O principal tem todas as permissões por definição; os demais só o
+    // que estiver marcado na ficha deles.
+    function adminPodeAprovar() {
+      return ehAdmin() && (fichaAdmin().get('principal', false) == true
+                           || fichaAdmin().get('podeAprovar', false) == true);
+    }
+
+    function adminPodeAlterarSegmento() {
+      return ehAdmin() && (fichaAdmin().get('principal', false) == true
+                           || fichaAdmin().get('podeAlterarSegmento', false) == true);
+    }
+
+    // Conta nasce pendente e só atende o público depois de aprovada.
+    // O padrão 'aprovada' é para as contas criadas antes desta regra
+    // existir: elas não podem parar de funcionar por falta de um campo.
+    function contaAprovada(bid) {
+      return get(/databases/$(database)/documents/barbearias/$(bid))
+               .data.get('aprovacao', 'aprovada') == 'aprovada';
+    }
+
+    // Conta suspensa continua lendo o próprio histórico, mas não grava
+    // nada novo. Custa uma leitura extra por escrita — barato perto de
+    // ter uma suspensão que não suspende de verdade.
+    function contaAtiva(bid) {
+      return get(/databases/$(database)/documents/barbearias/$(bid)).data.ativa != false;
+    }
+
+    function podeEscrever(bid) {
+      return daBarbearia(bid) && contaAtiva(bid);
+    }
+
+    function gestorAtivo(bid) {
+      return gestor(bid) && contaAtiva(bid);
+    }
+
+    function texto(campo, minimo) {
+      return campo is string && campo.size() >= minimo && campo.size() <= 300;
+    }
+
+    // Corpo de mensagem. Precisa de teto próprio: 300 caracteres é pouco
+    // até para um lembrete, e usar `texto()` aqui faria o Firestore
+    // recusar qualquer modelo de tamanho normal — com "permissões
+    // insuficientes", que não explica nada a quem só escreveu um texto.
+    function textoLongo(campo, minimo) {
+      return campo is string && campo.size() >= minimo && campo.size() <= 4000;
+    }
+
+    function ehDia(valor) {
+      return valor is string && valor.size() == 10 && valor.matches('\\d{4}-\\d{2}-\\d{2}');
+    }
+
+    // Logo e foto são gravadas dentro do próprio documento, como data URI.
+    // Sem teto aqui, uma imagem grande estouraria o limite de 1 MiB do
+    // documento e derrubaria toda a gravação daquela barbearia — inclusive
+    // as que nada têm a ver com imagem. O app já reduz antes de enviar;
+    // esta regra é a rede embaixo.
+    function imagemOk(valor) {
+      return valor == null
+             || (valor is string
+                 && valor.size() <= 200000
+                 && valor.matches('data:image/(png|jpeg|webp);base64,.*'));
+    }
+
+    /* ------------------------------------------------------------- */
+    /* admins — a permissão da plataforma                             */
+    /* ------------------------------------------------------------- */
+    match /admins/{uid} {
+      // Cada um pergunta sobre si mesmo; o principal lê a lista inteira,
+      // que é o que a tela de Permissões de cadastro precisa.
+      allow read: if logado() && (request.auth.uid == uid || ehAdminPrincipal());
+
+      // O principal cria e ajusta os demais administradores, mas NÃO
+      // fabrica outro principal: `principal` só entra por console. Sem
+      // isso, quem tivesse a senha de um principal poderia criar um
+      // segundo e a revogação deixaria de ser suficiente.
+      allow create, update: if ehAdminPrincipal()
+                            && request.auth.uid != uid
+                            && request.resource.data.get('principal', false) == false;
+
+      // Ninguém se apaga: um principal que se removesse por engano
+      // deixaria a plataforma sem quem administrasse os administradores.
+      allow delete: if ehAdminPrincipal() && request.auth.uid != uid;
+    }
+
+    /* ------------------------------------------------------------- */
+    /* usuarios — quem é você e de qual barbearia                     */
+    /* ------------------------------------------------------------- */
+    match /usuarios/{uid} {
+      // ESTE DOCUMENTO É A PERMISSÃO. Ter conta de autenticação não abre
+      // o painel: abre existir uma linha aqui apontando para a barbearia.
+      // É o que permite revogar alguém sem apagar a conta dele.
+
+      // Cada um lê o próprio; o dono lê os da equipe para montar a tela
+      // de acessos.
+      allow read: if logado() && (
+        request.auth.uid == uid
+        || (temPerfil() && resource.data.barbeariaId == perfil().barbeariaId)
+      );
+
+      allow create: if logado() && (
+        // quem acaba de cadastrar a própria barbearia
+        (request.auth.uid == uid
+          && request.resource.data.papel == 'dono'
+          && request.resource.data.barbeariaId is string)
+
+        // ou o dono liberando acesso a alguém da equipe. Nunca com papel
+        // 'dono': quem distribui acesso não pode fabricar outro
+        // distribuidor, nem se promover por tabela.
+        || (dono(request.resource.data.barbeariaId)
+            && request.resource.data.papel in ['gerente', 'barbeiro'])
+      );
+
+      allow update: if logado() && (
+        // o próprio nome, sim; migrar de barbearia ou mudar o próprio
+        // papel, não
+        (request.auth.uid == uid
+          && request.resource.data.barbeariaId == resource.data.barbeariaId
+          && request.resource.data.papel == resource.data.papel)
+
+        // o dono ajusta o nível de quem já está na equipe dele
+        || (dono(resource.data.barbeariaId)
+            && request.resource.data.barbeariaId == resource.data.barbeariaId
+            && request.resource.data.papel in ['gerente', 'barbeiro']
+            && resource.data.papel != 'dono')
+      );
+
+      // Revogar acesso é apagar este documento. O dono não apaga o
+      // próprio: a barbearia ficaria sem ninguém para administrá-la.
+      allow delete: if dono(resource.data.barbeariaId)
+                    && request.auth.uid != uid
+                    && resource.data.papel != 'dono';
+    }
+
+    /* ------------------------------------------------------------- */
+    /* slugs — índice público do link de agendamento                  */
+    /* ------------------------------------------------------------- */
+    match /slugs/{slug} {
+      allow read: if true;
+      allow create: if logado() && request.resource.data.barbeariaId is string;
+      // endereço publicado no Instagram não muda de dono, nem some
+      allow update, delete: if false;
+    }
+
+    /* ------------------------------------------------------------- */
+    /* barbearias                                                     */
+    /* ------------------------------------------------------------- */
+    match /barbearias/{bid} {
+      // Leitura aberta: o link público precisa do nome, endereço e
+      // horário de funcionamento, e o administrador precisa listar as
+      // contas. Só guarde aqui o que caberia numa placa na porta.
+      allow read: if true;
+
+      // Toda conta nasce PENDENTE. Forçar aqui, e não só no aplicativo, é
+      // o que impede alguém de criar a conta já aprovada chamando a API
+      // direto — a aprovação é a porta de entrada da plataforma.
+      allow create: if logado()
+                    && request.resource.data.get('aprovacao', '') == 'pendente';
+
+      allow delete: if false;
+
+      allow update: if
+        // A barbearia edita os próprios dados — menos plano e situação,
+        // que são decisão comercial, e menos SEGMENTO e APROVAÇÃO, que
+        // são decisão da plataforma.
+        //
+        // O segmento é travado aqui, no banco, e não apenas escondido da
+        // tela: esconder o campo só resolve para quem usa a tela.
+        (gestorAtivo(bid)
+          && request.resource.data.plano == resource.data.plano
+          && request.resource.data.ativa == resource.data.ativa
+          && request.resource.data.get('segmento', null) == resource.data.get('segmento', null)
+          && request.resource.data.get('aprovacao', null) == resource.data.get('aprovacao', null)
+          && imagemOk(request.resource.data.get('logoUrl', null)))
+
+        // qualquer membro carimba o último acesso (inclusive suspensa:
+        // saber que tentou entrar é informação útil)
+        || (daBarbearia(bid)
+            && request.resource.data.diff(resource.data)
+                 .affectedKeys().hasOnly(['ultimoAcessoEm']))
+
+        // o administrador mexe em plano e situação
+        || (ehAdmin()
+            && request.resource.data.diff(resource.data)
+                 .affectedKeys().hasOnly(['plano', 'ativa']))
+
+        // aprovar ou rejeitar exige a permissão de aprovar cadastros
+        || (adminPodeAprovar()
+            && request.resource.data.diff(resource.data)
+                 .affectedKeys().hasOnly(['aprovacao', 'aprovadaEm', 'aprovadaPor', 'motivoRejeicao'])
+            && request.resource.data.aprovacao in ['pendente', 'aprovada', 'rejeitada'])
+
+        // e trocar o segmento exige a permissão própria
+        || (adminPodeAlterarSegmento()
+            && request.resource.data.diff(resource.data)
+                 .affectedKeys().hasOnly(['segmento']));
+
+      // Confere o agendamento público contra o serviço cadastrado. Sem
+      // isto, alguém poderia postar um agendamento de R$ 0,00 ou de 5
+      // minutos para um corte de 45 e sujar o faturamento do mês.
+      function agendamentoPublicoValido(bid) {
+        let d = request.resource.data;
+        let servico = get(
+          /databases/$(database)/documents/barbearias/$(bid)/servicos/$(d.servicoId)
+        ).data;
+
+        return logado()
+               && contaAtiva(bid)
+               // conta em análise não recebe agendamento: enquanto a
+               // plataforma não aprovou, o link não vale
+               && contaAprovada(bid)
+               && d.status == 'agendado'
+               && d.origem == 'publico'
+               && ehDia(d.dia)
+               && d.inicioMin is int && d.inicioMin >= 0 && d.inicioMin < 1440
+               && d.duracaoMin == servico.duracaoMin
+               && d.precoCentavos == servico.precoCentavos
+               && servico.ativo == true
+               && texto(d.clienteNome, 2)
+               && texto(d.clienteTelefone, 10)
+               && d.barbeiroId is string
+               && exists(
+                    /databases/$(database)/documents/barbearias/$(bid)/barbeiros/$(d.barbeiroId)
+                  );
+      }
+
+      /* --- configuração: todos leem, só o gestor altera ----------- */
+      match /barbeiros/{id} {
+        // leitura aberta porque o cliente precisa ver quem atende — e,
+        // agora, a foto de cada um na hora de escolher
+        allow read: if true;
+        allow create, update: if gestorAtivo(bid)
+                              && imagemOk(request.resource.data.get('fotoUrl', null));
+        allow delete: if gestorAtivo(bid);
+      }
+
+      match /servicos/{id} {
+        allow read: if true;
+        allow write: if gestorAtivo(bid);
+      }
+
+      match /bloqueios/{id} {
+        allow read: if true;
+        allow write: if podeEscrever(bid);
+      }
+
+      /* --- clientes: dado pessoal, nunca é leitura pública -------- */
+      match /clientes/{telefone} {
+        // Nem o administrador da plataforma entra aqui: a carteira de
+        // clientes é da barbearia, não de quem hospeda o sistema.
+        allow read: if daBarbearia(bid);
+
+        allow create: if podeEscrever(bid)
+                      || (logado()
+                          && contaAtiva(bid)
+                          && texto(request.resource.data.nome, 2)
+                          && texto(request.resource.data.telefone, 10)
+                          && request.resource.data.telefone == telefone);
+
+        // De fora, só o nome pode ser tocado — saber o telefone de
+        // alguém não pode dar acesso a reescrever a ficha inteira.
+        allow update: if podeEscrever(bid)
+                      || (logado()
+                          && contaAtiva(bid)
+                          && request.resource.data.diff(resource.data)
+                               .affectedKeys().hasOnly(['nome']));
+
+        allow delete: if gestorAtivo(bid);
+      }
+
+      /* --- modelos de mensagem ------------------------------------ */
+      //
+      // Nada aqui é público: o texto que o estabelecimento manda para a
+      // carteira dele é assunto interno, e a página de agendamento não
+      // tem por que lê-lo.
+      match /modelos/{id} {
+        allow read: if daBarbearia(bid);
+        allow create, update: if podeEscrever(bid)
+                              && texto(request.resource.data.nome, 2)
+                              && textoLongo(request.resource.data.texto, 5)
+                              && request.resource.data.canal in ['whatsapp', 'email'];
+        allow delete: if podeEscrever(bid);
+      }
+
+      /* --- comunicações: o histórico do que saiu ------------------ */
+      //
+      // REGISTRO NÃO SE REESCREVE.
+      // O valor de um histórico é ele não poder ser ajustado depois. Se
+      // um dia esta conversa virar discussão — "avisei", "não avisou" —
+      // um registro editável não serve de nada. Por isso `update` é
+      // negado a todo mundo, inclusive ao dono.
+      //
+      // `delete` fica com o gestor porque a LGPD dá ao titular o direito
+      // de pedir a eliminação dos dados dele, e a mensagem guarda nome e
+      // telefone de quem recebeu.
+      match /comunicacoes/{id} {
+        allow read: if daBarbearia(bid);
+        allow create: if podeEscrever(bid)
+                      && textoLongo(request.resource.data.texto, 1)
+                      && request.resource.data.canal in ['whatsapp', 'email'];
+
+        // `update` negado a todo mundo. A Cloud Function que carimba o
+        // status de entrega usa o Admin SDK, que não passa por estas
+        // regras — o histórico continua fechado para o navegador.
+        allow update: if false;
+        allow delete: if gestorAtivo(bid);
+      }
+
+      /* --- agendamentos ------------------------------------------ */
+
+      // Cancelamento pelo próprio cliente, da página pública.
+      //
+      // A operação é estreitíssima de propósito: só pode virar
+      // 'cancelado', só a partir de um agendamento ativo, e nada mais no
+      // documento pode mudar. Sem o hasOnly, quem cancelasse poderia
+      // reescrever preço, horário ou nome no mesmo pedido.
+      function cancelamentoDoCliente() {
+        return logado()
+               && resource.data.status in ['agendado', 'confirmado']
+               && request.resource.data.status == 'cancelado'
+               && request.resource.data.diff(resource.data)
+                    .affectedKeys().hasOnly(['status', 'canceladoPeloCliente']);
+      }
+
+      match /agendamentos/{id} {
+        // `get` e `list` são separados aqui, e a diferença é o que torna
+        // o cancelamento público possível sem abrir a agenda:
+        //
+        //   get  — quem tem o id do agendamento lê aquele documento. O id
+        //          é aleatório de 20 caracteres e só chega a quem agendou;
+        //          na prática funciona como um link secreto, o mesmo
+        //          modelo de "seu pedido" de qualquer loja online.
+        //   list — enumerar a agenda continua sendo só de quem trabalha
+        //          no estabelecimento. Ninguém varre a carteira de
+        //          clientes a partir daqui.
+        allow get: if true;
+        allow list: if daBarbearia(bid);
+
+        allow create: if podeEscrever(bid) || agendamentoPublicoValido(bid);
+        allow update: if podeEscrever(bid) || cancelamentoDoCliente();
+        allow delete: if podeEscrever(bid);
+      }
+
+      /* --- reservas: a trava de horário --------------------------- */
+      match /reservas/{chave} {
+        // Só carrega ids e horários — nenhum dado pessoal. É o que
+        // permite a página pública montar os horários livres sem
+        // enxergar um único cliente.
+        allow read: if true;
+
+        allow create: if logado()
+                      && contaAtiva(bid)
+                      && contaAprovada(bid)
+                      && request.resource.data.keys()
+                           .hasOnly(['agendamentoId', 'barbeiroId', 'dia'])
+                      && ehDia(request.resource.data.dia);
+
+        // ESTA LINHA É A TRAVA. Sem update, um documento de reserva que
+        // já existe não pode ser sobrescrito por ninguém — nem por quem
+        // chamar a API na mão. Quem chegar segundo recebe erro do banco.
+        allow update: if false;
+
+        // Apagar libera o horário. O cliente que cancelou precisa disto,
+        // senão o horário ficaria preso a um atendimento que não vai
+        // acontecer — mas só para o agendamento que JÁ está cancelado.
+        //
+        // Sem essa amarração, um visitante anônimo poderia apagar
+        // qualquer reserva e a agenda inteira apareceria livre enquanto
+        // os atendimentos continuavam de pé.
+        allow delete: if podeEscrever(bid)
+                      || (logado()
+                          && get(/databases/$(database)/documents/barbearias/$(bid)/agendamentos/$(resource.data.agendamentoId))
+                               .data.status == 'cancelado');
+      }
+    }
+
+    /* ------------------------------------------------------------- */
+    /* Nada mais é acessível                                          */
+    /* ------------------------------------------------------------- */
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,23 @@
+# Dependências das Cloud Functions — reinstaladas com `npm install`.
+# São dezenas de milhares de arquivos; commitá-las estoura o repositório
+# e não serve para nada: o deploy roda o install por conta.
+functions/node_modules/
+node_modules/
+
+# Segredos. A chave do serviço de e-mail mora no Secret Manager do
+# Google (`firebase functions:secrets:set`), nunca em arquivo versionado.
+.env
+.env.*
+*-service-account*.json
+serviceAccountKey.json
+
+# Local do Firebase CLI
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# Sistema
+Thumbs.db
+.DS_Store
+*.log

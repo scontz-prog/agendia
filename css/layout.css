@@ -1,0 +1,846 @@
+/* =====================================================================
+   layout.css — estrutura das páginas
+   Celular: cabeçalho fixo no topo + navegação fixa embaixo (polegar).
+   Tablet/desktop: a navegação vira coluna lateral e some de baixo.
+   ===================================================================== */
+
+.envolucro {
+  width: 100%;
+  max-width: 1120px;
+  margin-inline: auto;
+  padding-inline: 16px;
+}
+
+/* ---------------------------------------------------------------- */
+/* vitrine (index.html)                                              */
+/* ---------------------------------------------------------------- */
+.topo-site {
+  border-bottom: 1px solid var(--borda);
+}
+
+.topo-site .envolucro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 60px;
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--texto);
+  text-decoration: none;
+}
+
+.marca:hover {
+  text-decoration: none;
+}
+
+/* A marca é o que o visitante precisa reconhecer aqui. Tamanho fluido
+   entre celular e desktop com uma linha, em vez de uma tabela de
+   breakpoints que sempre erra em alguma largura no meio. */
+.marca-heroi {
+  --marca-altura: clamp(46px, 8.5vw, 72px);
+  margin: 0 auto 26px;
+}
+
+/* Sombra sob o desenho: separa a logo do fundo verde sem precisar de
+   caixa nem borda em volta. */
+.marca-heroi img {
+  filter: drop-shadow(0 10px 26px rgb(0 0 0 / 0.45));
+}
+
+@media (max-width: 480px) {
+  .topo-site .marca-agendia {
+    --marca-altura: 36px;
+  }
+}
+
+/* ------------------------------------------------------------------
+   ABERTURA DA VITRINE
+
+   Ocupa a altura da janela e centra o conteúdo nos dois eixos. Antes era
+   só padding fixo no topo: em tela alta a marca ficava encostada em cima
+   com um vazio embaixo; em tela baixa o botão caía fora da dobra.
+
+   `dvh` e não `vh` porque no celular a barra do navegador aparece e some
+   ao rolar — com `vh` a tela "pula" no meio do gesto.
+
+   `min-height` (e não `height`) mantém o fluxo normal quando o conteúdo
+   for mais alto que a janela: em vez de cortar nas duas pontas, ele
+   volta a rolar.
+   ------------------------------------------------------------------ */
+.heroi {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100dvh - 61px); /* 61px = cabeçalho + borda */
+  padding: 48px 0;
+  text-align: center;
+}
+
+.heroi .selo {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--destaque);
+}
+
+.heroi h1 {
+  margin: 14px auto 0;
+  max-width: 18ch;
+  font-size: clamp(1.75rem, 7vw, 2.75rem);
+}
+
+.heroi p {
+  margin: 16px auto 0;
+  max-width: 46ch;
+  color: var(--texto-suave);
+  text-wrap: pretty;
+}
+
+.heroi-acoes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+@media (min-width: 560px) {
+  .heroi-acoes {
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .heroi-acoes .btn {
+    min-width: 180px;
+  }
+}
+
+/* Os segmentos atendidos, logo abaixo dos botões da capa.
+   Discretos de propósito: são prova de abrangência, não a chamada. Se
+   competissem em peso com o título, a capa passaria a ser sobre a lista. */
+.segmentos-atendidos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 30px auto 0;
+  padding: 0;
+  list-style: none;
+}
+
+.segmentos-atendidos li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--borda);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--superficie) 55%, transparent);
+  font-size: 0.8125rem;
+  color: var(--texto-suave);
+  white-space: nowrap;
+}
+
+.recursos {
+  display: grid;
+  gap: 12px;
+  padding-bottom: 56px;
+}
+
+@media (min-width: 640px) {
+  .recursos {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 960px) {
+  .recursos {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.recurso {
+  padding: 18px;
+}
+
+.recurso .icone {
+  font-size: 1.5rem;
+}
+
+.recurso h2 {
+  margin-top: 10px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.recurso p {
+  margin-top: 6px;
+  font-size: 0.875rem;
+  color: var(--texto-suave);
+}
+
+/* A porta da administração não fica ao lado do "Entrar": quem chega à
+   vitrine é estabelecimento, e um segundo botão de login na mesma altura
+   só gera dúvida sobre qual clicar. No rodapé, discreta, quem precisa
+   acha e quem não precisa não tropeça. */
+.acesso-plataforma {
+  opacity: 0.55;
+  transition: opacity 0.15s;
+}
+
+.acesso-plataforma:hover {
+  opacity: 1;
+}
+
+.rodape-site {
+  border-top: 1px solid var(--borda);
+  padding: 20px 0;
+  font-size: 0.8125rem;
+  color: var(--texto-fraco);
+}
+
+/* ---------------------------------------------------------------- */
+/* telas de autenticação                                             */
+/* ---------------------------------------------------------------- */
+.tela-auth {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: 32px 16px;
+}
+
+.caixa-auth {
+  width: 100%;
+  max-width: 380px;
+  margin-inline: auto;
+}
+
+/* `display: flex` e não o `inline-flex` herdado: margem automática só
+   centraliza caixa de bloco — num elemento inline ela vale zero, e era por
+   isso que a marca encostava na borda esquerda do cartão. O `fit-content`
+   mantém a caixa colada ao conteúdo, para a margem ter o que centralizar. */
+.caixa-auth .marca,
+.caixa-auth .marca-auth {
+  display: flex;
+  width: fit-content;
+  justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 1.125rem;
+}
+
+/* Diz de cara em que porta a pessoa entrou. Duas telas de login quase
+   idênticas sem rótulo seriam um convite a digitar a senha na errada. */
+.faixa-area {
+  margin: 0 0 20px;
+  text-align: center;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--texto-suave);
+}
+
+.faixa-admin {
+  color: var(--destaque);
+}
+
+/* A porta da administração tem um fundo levemente distinto — reconhecer
+   a área antes de ler o texto evita erro de digitar a senha na errada. */
+.tela-admin-auth {
+  background:
+    radial-gradient(
+      120% 90% at 50% 0%,
+      color-mix(in srgb, var(--destaque) 9%, transparent) 0%,
+      transparent 60%
+    ),
+    var(--fundo);
+}
+
+.rodape-auth {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--texto-suave);
+}
+
+/* ---------------------------------------------------------------- */
+/* aplicação (painel.html)                                           */
+/* ---------------------------------------------------------------- */
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+/* Barra superior em três faixas: a marca da plataforma discreta à
+   esquerda, a marca da barbearia centralizada de verdade (as laterais têm
+   largura mínima igual, senão o "centro" escorrega para o lado do bloco
+   mais estreito) e a saída à direita. */
+.app-topo {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 62px;
+  padding: 8px 12px;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+
+.app-topo .topo-esq,
+.app-topo .topo-dir {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  min-width: 68px;
+}
+
+.app-topo .topo-dir {
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* No celular só os ícones cabem; o rótulo volta a partir do tablet. */
+.app-topo .rotulo-link,
+.app-topo .rotulo-sair {
+  display: none;
+}
+
+.app-topo .topo-dir .btn-mini,
+.app-topo .topo-dir .btn-sair {
+  padding-inline: 12px;
+}
+
+@media (min-width: 620px) {
+  .app-topo .rotulo-sair {
+    display: inline;
+  }
+}
+
+@media (min-width: 900px) {
+  .app-topo .rotulo-link {
+    display: inline;
+  }
+}
+
+.app-topo .topo-centro {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  text-align: center;
+}
+
+.app-topo .topo-centro .nome-barbearia,
+.app-topo .topo-centro .titulo {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-topo .sub {
+  font-size: 0.6875rem;
+  color: var(--texto-fraco);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-conteudo {
+  flex: 1;
+  padding: 20px 16px;
+  /* espaço para a navegação inferior não cobrir o conteúdo */
+  padding-bottom: calc(var(--barra-inferior) + 24px + env(safe-area-inset-bottom));
+}
+
+.app-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  display: flex;
+  background: var(--superficie);
+  border-top: 1px solid var(--borda);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.app-nav a {
+  flex: 1;
+  /* com 6 itens em 360px cada um fica com 60px: o rótulo precisa poder
+     encolher sem empurrar a barra para fora da tela */
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: var(--barra-inferior);
+  padding: 6px 2px;
+  font-size: 0.625rem;
+  color: var(--texto-suave);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-nav a:hover {
+  text-decoration: none;
+}
+
+.app-nav .icone {
+  font-size: 1.125rem;
+  line-height: 1;
+}
+
+.app-nav a[aria-current="page"] {
+  color: var(--destaque);
+}
+
+.app-lateral {
+  display: none;
+}
+
+/* Painel de uma tela só (barbeiro): sem barra inferior, e sem o vão que
+   ela deixava embaixo do conteúdo. */
+.app.sem-nav .app-nav {
+  display: none;
+}
+
+.app.sem-nav .app-conteudo {
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
+}
+
+/* cabeçalho de cada tela do painel */
+.cabecalho-tela {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.cabecalho-tela p {
+  margin-top: 4px;
+  font-size: 0.875rem;
+  color: var(--texto-suave);
+}
+
+/* --- tablet e desktop -------------------------------------------- */
+@media (min-width: 900px) {
+  .app {
+    flex-direction: row;
+  }
+
+  .app-nav {
+    display: none;
+  }
+
+  .app-lateral {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    width: var(--largura-lateral);
+    flex-shrink: 0;
+    padding: 18px 14px;
+    background: var(--superficie);
+    border-right: 1px solid var(--borda);
+  }
+
+  /* No desktop a marca da plataforma mora no topo da coluna lateral —
+     que é, literalmente, o canto superior esquerdo da tela. */
+  .app-lateral .marca-canto img {
+    height: 30px;
+  }
+
+  .app-lateral nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .app-lateral nav a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--raio-sm);
+    font-size: 0.9375rem;
+    color: var(--texto-suave);
+    text-decoration: none;
+  }
+
+  .app-lateral nav a:hover {
+    background: var(--superficie-2);
+    color: var(--texto);
+    text-decoration: none;
+  }
+
+  .app-lateral nav a[aria-current="page"] {
+    background: color-mix(in srgb, var(--destaque) 12%, transparent);
+    color: var(--destaque);
+    font-weight: 500;
+  }
+
+  .app-lateral .rodape-lateral {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .app-principal {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* A marca da plataforma já está no topo da coluna lateral; o resto da
+     barra permanece, porque link e saída ficam à direita em toda largura. */
+  .app-topo .topo-esq {
+    display: none;
+  }
+
+  .app-topo {
+    min-height: 76px;
+    padding: 10px 32px;
+  }
+
+  .app-conteudo {
+    padding: 28px 32px;
+    padding-bottom: 40px;
+  }
+
+  .app-conteudo > * {
+    max-width: 1080px;
+  }
+}
+
+/* ---------------------------------------------------------------- */
+/* caixa do link público                                             */
+/* ---------------------------------------------------------------- */
+.caixa-link {
+  padding: 12px;
+  background: var(--superficie-2);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-sm);
+}
+
+.caixa-link .url {
+  margin-top: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+  color: var(--destaque);
+  overflow-wrap: anywhere;
+}
+
+.caixa-link .acoes {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.caixa-link .acoes .btn {
+  flex: 1;
+}
+
+/* ---------------------------------------------------------------- */
+/* página pública de agendamento (agendar.html)                      */
+/* ---------------------------------------------------------------- */
+.pagina-publica {
+  width: 100%;
+  max-width: 520px;
+  margin-inline: auto;
+  padding: 32px 16px 48px;
+}
+
+.vitrine-barbearia {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.vitrine-barbearia .emblema {
+  font-size: 2.5rem;
+}
+
+/* A logo da barbearia é a primeira coisa que o cliente vê ao abrir o
+   link — tem que ter presença, sem virar outdoor. */
+.vitrine-barbearia .logo-barbearia {
+  max-height: 96px;
+  margin: 0 auto 12px;
+}
+
+.vitrine-barbearia h1 {
+  margin-top: 10px;
+  font-size: 1.5rem;
+}
+
+.vitrine-barbearia.com-logo h1 {
+  margin-top: 0;
+  font-size: 1.125rem;
+  color: var(--texto-suave);
+  font-weight: 500;
+}
+
+.vitrine-barbearia .contatos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 16px;
+  margin-top: 8px;
+  font-size: 0.875rem;
+  color: var(--texto-fraco);
+}
+
+.passo {
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.passo-titulo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.passo-numero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--borda-forte);
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--texto-suave);
+}
+
+.passo-numero.pronto {
+  background: var(--destaque);
+  border-color: var(--destaque);
+  color: var(--destaque-contraste);
+}
+
+/* opções em cartão (serviços) */
+.opcao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 8px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-sm);
+  background: var(--superficie-2);
+  text-align: left;
+}
+
+.opcao:hover {
+  border-color: var(--borda-forte);
+}
+
+.opcao[aria-pressed="true"] {
+  border-color: var(--destaque);
+  background: color-mix(in srgb, var(--destaque) 10%, transparent);
+}
+
+.opcao .nome {
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.opcao .detalhe {
+  font-size: 0.8125rem;
+  color: var(--texto-suave);
+}
+
+.opcao .preco {
+  text-align: right;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+/* fichas em linha (barbeiros) */
+.fichas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ficha {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-sm);
+  background: var(--superficie-2);
+  font-size: 0.9375rem;
+}
+
+.ficha[aria-pressed="true"] {
+  border-color: var(--destaque);
+  background: color-mix(in srgb, var(--destaque) 10%, transparent);
+}
+
+.ponto {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Escolha do barbeiro com foto: cartão vertical, para o rosto ter
+   tamanho suficiente de ser reconhecido no celular. */
+.fichas-barbeiro {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 10px;
+}
+
+.ficha-com-foto {
+  flex-direction: column;
+  gap: 8px;
+  min-height: auto;
+  padding: 14px 8px;
+  text-align: center;
+  font-size: 0.8125rem;
+}
+
+.ficha-com-foto .truncar {
+  max-width: 100%;
+}
+
+/* faixa de dias com rolagem horizontal */
+.faixa-dias {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin-bottom: 14px;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.dia-botao {
+  flex-shrink: 0;
+  min-width: 76px;
+  min-height: 56px;
+  padding: 8px 12px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-sm);
+  background: var(--superficie-2);
+  font-size: 0.75rem;
+  color: var(--texto-suave);
+  text-align: center;
+}
+
+.dia-botao .numero {
+  display: block;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--texto);
+}
+
+.dia-botao[aria-pressed="true"] {
+  border-color: var(--destaque);
+  background: color-mix(in srgb, var(--destaque) 10%, transparent);
+  color: var(--destaque);
+}
+
+.dia-botao[aria-pressed="true"] .numero {
+  color: var(--destaque);
+}
+
+/* grade de horários livres */
+.horarios {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+@media (min-width: 420px) {
+  .horarios {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.horario {
+  min-height: 44px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-sm);
+  background: var(--superficie-2);
+  font-size: 0.9375rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.horario[aria-pressed="true"] {
+  border-color: var(--destaque);
+  background: color-mix(in srgb, var(--destaque) 15%, transparent);
+  color: var(--destaque);
+  font-weight: 500;
+}
+
+.resumo {
+  padding: 12px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-sm);
+  background: var(--superficie-2);
+  font-size: 0.875rem;
+}
+
+.recibo {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  margin-top: 20px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-sm);
+  background: var(--superficie-2);
+  text-align: left;
+  font-size: 0.9375rem;
+}
+
+.recibo div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.recibo dt {
+  color: var(--texto-fraco);
+}
+
+.recibo dd {
+  font-weight: 500;
+  text-align: right;
+}

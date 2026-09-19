@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#062A20" />
+    <title>Agendar horário</title>
+    <meta name="description" content="Escolha o serviço, o profissional e o horário." />
+    <link rel="icon" type="image/png" href="assets/favicon.png" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/componentes.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+  </head>
+
+  <body>
+    <main id="pagina" class="pagina-publica">
+      <div class="carregando"><div class="girando"></div>Carregando…</div>
+    </main>
+
+    <script type="module">
+      import("./js/agendar.js").catch((erro) => {
+        console.error(erro);
+        document.getElementById("pagina").innerHTML =
+          '<div class="aviso aviso-erro">Não foi possível carregar a página de ' +
+          "agendamento. Verifique sua conexão e tente de novo.</div>";
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0B3D2E" />
+    <title>Painel — Agendia</title>
+    <link rel="icon" type="image/png" href="assets/favicon.png" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/componentes.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/agenda.css" />
+  </head>
+
+  <body>
+    <div class="app">
+      <!-- coluna lateral: só aparece a partir de 900px -->
+      <aside class="app-lateral">
+        <div>
+          <!-- marca da plataforma no canto superior esquerdo, discreta -->
+          <div id="marca-lateral"></div>
+          <p id="lateral-nome" class="truncar" style="margin-top: 12px; font-weight: 600"></p>
+          <p id="lateral-usuario" class="fraco pequeno truncar"></p>
+        </div>
+
+        <nav data-nav>
+          <a href="#/"><span class="icone" aria-hidden="true">📊</span> Visão geral</a>
+          <a href="#/agenda"><span class="icone" aria-hidden="true">🗓️</span> Agenda</a>
+          <a href="#/clientes"><span class="icone" aria-hidden="true">👥</span> Clientes</a>
+          <a href="#/mensagens"><span class="icone" aria-hidden="true">💬</span> Mensagens</a>
+          <a href="#/servicos"><span class="icone" aria-hidden="true">✂️</span> Serviços</a>
+          <!-- Rótulo e ícone neutros: o segmento da conta os substitui
+               assim que o painel carrega (rotularNavegacao). Deixar
+               "Barbeiros" aqui piscaria na tela de toda clínica. -->
+          <a href="#/barbeiros"><span class="icone" aria-hidden="true">🧑</span> Profissionais</a>
+          <a href="#/equipe"><span class="icone" aria-hidden="true">🔑</span> Acessos</a>
+          <a href="#/config"><span class="icone" aria-hidden="true">⚙️</span> Configurações</a>
+        </nav>
+
+      </aside>
+
+      <div class="app-principal">
+        <!-- Três faixas: Agendia à esquerda (só no celular, porque no
+             desktop ela já está no topo da coluna lateral), a marca do
+             estabelecimento centralizada e a saída à direita. -->
+        <header class="app-topo">
+          <div class="topo-esq" id="topo-marca"></div>
+          <div class="topo-centro" id="topo-barbearia"></div>
+          <!-- Link de agendamento e saída no canto superior direito, em
+               todas as larguras: são as duas ações que o profissional
+               procura fora do fluxo da agenda. -->
+          <div class="topo-dir">
+            <button class="btn btn-secundario btn-mini" id="btn-link" type="button">
+              <span aria-hidden="true">🔗</span>
+              <span class="rotulo-link">Link de agendamento</span>
+            </button>
+            <button class="btn btn-sair" data-sair type="button">
+              <span aria-hidden="true">⏻</span>
+              <span class="rotulo-sair">Sair</span>
+            </button>
+          </div>
+        </header>
+
+        <main id="conteudo" class="app-conteudo">
+          <div class="carregando"><div class="girando"></div>Carregando…</div>
+        </main>
+      </div>
+
+      <!-- navegação inferior: alcance do polegar, some no desktop -->
+      <nav class="app-nav" data-nav aria-label="Navegação principal">
+        <a href="#/"><span class="icone" aria-hidden="true">📊</span> Geral</a>
+        <a href="#/agenda"><span class="icone" aria-hidden="true">🗓️</span> Agenda</a>
+        <a href="#/clientes"><span class="icone" aria-hidden="true">👥</span> Clientes</a>
+        <a href="#/mensagens"><span class="icone" aria-hidden="true">💬</span> Avisos</a>
+        <a href="#/servicos"><span class="icone" aria-hidden="true">✂️</span> Serviços</a>
+        <a href="#/equipe"><span class="icone" aria-hidden="true">🔑</span> Acessos</a>
+        <a href="#/config"><span class="icone" aria-hidden="true">⚙️</span> Config</a>
+      </nav>
+    </div>
+
+    <script type="module">
+      import("./js/painel.js").catch((erro) => {
+        console.error(erro);
+        document.getElementById("conteudo").innerHTML =
+          '<div class="aviso aviso-erro">Não foi possível carregar o painel. ' +
+          "Verifique sua conexão e se <code>js/config/firebase-config.js</code> foi preenchido.</div>";
+      });
+    </script>
+  </body>
+</html>

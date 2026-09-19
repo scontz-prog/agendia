@@ -1,0 +1,263 @@
+/* =====================================================================
+   base.css — reset, variáveis e tipografia
+   Mobile first: tudo aqui vale para o celular. As telas maiores só
+   recebem ajustes em layout.css, nunca o contrário.
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   Outfit — hospedada aqui dentro, não puxada do Google.
+
+   A fonte é a marca: se ela não chega, o nome do produto aparece na
+   fonte do sistema e a identidade se desfaz. Depender de um domínio de
+   terceiros para isso é uma falha esperando acontecer — e evita também
+   que o IP de cada visitante seja entregue a outro servidor só para
+   desenhar uma letra.
+
+   É variável (um arquivo cobre 300 a 700), então são 15 KB para todos os
+   pesos. `swap` deixa o texto legível enquanto ela carrega.
+   --------------------------------------------------------------------- */
+@font-face {
+  font-family: "Outfit";
+  src: url("../assets/fontes/outfit-variavel.woff2") format("woff2-variations");
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* ------------------------------------------------------------------
+     PALETA — verde escuro e laranja
+
+       #062A20  verde profundo ... fundo e menus
+       #0B3D2E  verde escuro ..... superfícies e marca
+       #F28C28  laranja .......... ação e destaque
+       off-white ................. texto
+
+     Os degraus entre #062A20 e #0B3D2E não são enfeite: sem eles,
+     cartão, campo e borda cairiam na mesma cor e a tela perderia
+     profundidade — tudo viraria uma chapa verde só.
+
+     O laranja aparece POUCO de propósito. Ele é o que diz "clique
+     aqui"; espalhado por toda parte deixa de significar isso e a tela
+     fica carregada. Regra prática: laranja no botão principal, no item
+     de menu ativo e no número que importa. Nada além disso.
+     ------------------------------------------------------------------ */
+
+  /* superfícies: degraus do fundo em direção ao verde da marca */
+  --fundo: #062a20;
+  --superficie: #0b3d2e;
+  --superficie-2: #0f4a38;
+  --superficie-3: #145844;
+  --borda: #1b6a52;
+  --borda-forte: #2a8468;
+
+  /* texto: off-white levemente esverdeado, para assentar no fundo */
+  --texto: #f2f7f4;
+  --texto-suave: #b6cfc4;
+  --texto-fraco: #83a598;
+
+  /* marca */
+  --marca: #0b3d2e;
+  --marca-escura: #062a20;
+  --destaque: #f28c28;
+  --destaque-claro: #ffa64d;
+  --destaque-contraste: #1a0d00;
+
+  /* ------------------------------------------------------------------
+     ESTADOS
+     O verde da interface é fundo, não semântica — por isso o verde de
+     "realizado" precisa ser bem mais claro e saturado que o da paleta,
+     senão some dentro do próprio fundo.
+
+     O vermelho de perigo é distinto do laranja de ação: se fossem
+     parecidos, "cancelar" e "confirmar" ficariam do mesmo tom.
+     ------------------------------------------------------------------ */
+  --sucesso: #5ee9a0;
+  --alerta: #f28c28;
+  /* O vermelho é claro assim porque precisa passar 4,5:1 também sobre as
+     superfícies mais claras (#0F4A38, #145844), não só sobre o fundo. Um
+     vermelho mais fechado ficava legível no fundo e sumia dentro do
+     cartão — justamente onde a pendência aparece. */
+  --erro: #ff9d94;
+  --info: #7dd3c0;
+
+  /* medidas */
+  --raio: 12px;
+  --raio-sm: 8px;
+  --barra-inferior: 62px;
+  --largura-lateral: 240px;
+
+  /* fontes */
+  --fonte: "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100dvh;
+  /* Verde chapado do topo ao rodapé fica pesado numa tela cheia. Dois
+     brilhos muito diluídos — verde da marca em cima, laranja embaixo —
+     dão profundidade sem que nenhuma cor nova entre na paleta. O
+     `fixed` evita que a mancha "role" junto com o conteúdo. */
+  background:
+    radial-gradient(120% 80% at 50% -10%, color-mix(in srgb, var(--superficie) 85%, transparent) 0%, transparent 62%),
+    radial-gradient(90% 60% at 85% 105%, color-mix(in srgb, var(--destaque) 7%, transparent) 0%, transparent 60%),
+    var(--fundo);
+  background-attachment: fixed;
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  /* respeita o notch e a barra de gestos do celular */
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+a {
+  color: var(--destaque);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+h2 {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+h3 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+:focus-visible {
+  outline: 2px solid var(--destaque);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------- */
+/* utilitários                                                       */
+/* ---------------------------------------------------------------- */
+.oculto {
+  display: none !important;
+}
+
+.so-leitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.suave {
+  color: var(--texto-suave);
+}
+
+.fraco {
+  color: var(--texto-fraco);
+}
+
+.destaque {
+  color: var(--destaque);
+}
+
+.truncar {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pequeno {
+  font-size: 0.8125rem;
+}
+
+.centro {
+  text-align: center;
+}
+
+.pilha {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.linha {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.entre {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.crescer {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

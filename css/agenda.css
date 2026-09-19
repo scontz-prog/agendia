@@ -1,0 +1,245 @@
+/* =====================================================================
+   agenda.css — grade horário × barbeiro
+   No celular as colunas rolam na horizontal com a régua de horas fixa
+   à esquerda; no desktop cabem todas na tela.
+   ===================================================================== */
+
+.agenda-barra {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.agenda-barra .navegar {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-sm);
+  background: var(--superficie-2);
+  font-size: 1.125rem;
+}
+
+.agenda-barra .data-atual {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+
+.agenda-barra .data-atual .dia {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.agenda-barra .data-atual .expediente {
+  font-size: 0.75rem;
+  color: var(--texto-fraco);
+}
+
+.agenda-ferramentas {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.agenda-ferramentas .campo {
+  flex: 1;
+}
+
+.grade {
+  position: relative;
+  overflow-x: auto;
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  -webkit-overflow-scrolling: touch;
+}
+
+.grade-interna {
+  display: flex;
+  min-width: min-content;
+}
+
+/* régua de horas — fica colada à esquerda enquanto as colunas rolam */
+.regua {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  flex-shrink: 0;
+  width: 48px;
+  background: var(--superficie);
+  border-right: 1px solid var(--borda);
+}
+
+.regua-cabecalho,
+.coluna-cabecalho {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  height: 42px;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+}
+
+.coluna-cabecalho {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+}
+
+.coluna-cabecalho .nome {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.regua-corpo {
+  position: relative;
+}
+
+.marca-hora {
+  position: absolute;
+  right: 6px;
+  transform: translateY(-50%);
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--texto-fraco);
+}
+
+.coluna {
+  flex-shrink: 0;
+  width: 148px;
+  border-right: 1px solid var(--borda);
+}
+
+.coluna:last-child {
+  border-right: none;
+}
+
+@media (min-width: 640px) {
+  .coluna {
+    width: 176px;
+  }
+}
+
+.coluna-corpo {
+  position: relative;
+  cursor: copy;
+}
+
+.linha-hora,
+.linha-meia {
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+}
+
+.linha-hora {
+  border-top: 1px solid color-mix(in srgb, var(--borda) 75%, transparent);
+}
+
+.linha-meia {
+  border-top: 1px solid color-mix(in srgb, var(--borda) 28%, transparent);
+}
+
+.agora {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 4;
+  border-top: 2px solid var(--erro);
+  pointer-events: none;
+}
+
+.agora::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: -4px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--erro);
+}
+
+.bloco {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  overflow: hidden;
+  padding: 4px 6px;
+  border-radius: 6px;
+  text-align: left;
+  line-height: 1.25;
+}
+
+.bloco .hora {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bloco .servico {
+  display: block;
+  font-size: 0.6875rem;
+  color: var(--texto-suave);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bloco:hover {
+  filter: brightness(1.15);
+}
+
+.bloco-inativo {
+  background: var(--superficie-3);
+  border: 1px solid var(--borda);
+  opacity: 0.5;
+}
+
+.bloco-inativo .hora {
+  text-decoration: line-through;
+}
+
+.bloco-bloqueio {
+  border: 1px solid var(--borda-forte);
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 6px,
+    rgb(255 255 255 / 0.05) 6px,
+    rgb(255 255 255 / 0.05) 12px
+  );
+  pointer-events: none;
+}
+
+.bloco-bloqueio .hora {
+  color: var(--texto-fraco);
+  font-weight: 500;
+}
+
+/* legenda dos barbeiros abaixo da grade */
+.legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 12px;
+  font-size: 0.75rem;
+  color: var(--texto-suave);
+}
+
+.legenda span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}

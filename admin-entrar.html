@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#062A20" />
+    <title>Administração — Agendia</title>
+    <!-- porta de serviço: não deve aparecer em busca -->
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" type="image/png" href="assets/favicon.png" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/componentes.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+  </head>
+
+  <body>
+    <main class="tela-auth tela-admin-auth">
+      <div class="caixa-auth">
+        <a class="marca-agendia empilhada marca-auth" href="index.html" style="--marca-altura: 54px">
+          <img src="assets/agendia-simbolo.webp" alt="" />
+          <span class="marca-agendia-texto">
+            <span class="marca-agendia-nome">AGENDIA</span>
+            <span class="marca-agendia-lema">Organização e tempo</span>
+          </span>
+        </a>
+
+        <p class="faixa-area faixa-admin">Administração da plataforma</p>
+
+        <div id="conteudo" class="cartao cartao-corpo">
+          <div class="carregando"><div class="girando"></div>Carregando…</div>
+        </div>
+
+        <div id="extra"></div>
+
+        <p class="rodape-auth">
+          <a class="pequeno fraco" href="entrar.html">Sou de um estabelecimento</a>
+        </p>
+      </div>
+    </main>
+
+    <script type="module">
+      import("./js/admin-entrar.js").catch((erro) => {
+        console.error(erro);
+        document.getElementById("conteudo").innerHTML =
+          '<div class="aviso aviso-erro">Não foi possível carregar a tela de acesso. ' +
+          "Verifique sua conexão.</div>";
+      });
+    </script>
+  </body>
+</html>
