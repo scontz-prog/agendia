@@ -38,17 +38,19 @@ export const firebaseConfig = {
 };
 
 /**
- * Chave do site do reCAPTCHA v3, para o App Check.
+ * Chave do site do reCAPTCHA Enterprise, para o App Check.
  *
  * Vazia = App Check desligado. Com ela preenchida, o site passa a provar
  * ao Firebase que cada pedido vem DESTE site, e não de um script chamando
  * o banco direto — é o que permite recusar a enxurrada de agendamentos
  * falsos pelo link público, que as regras sozinhas não conseguem frear.
  *
- * É a chave do SITE (pública). A chave SECRETA vai só no console do
- * Firebase, nunca aqui.
+ * É a chave do SITE (pública). No Enterprise não existe chave secreta a
+ * guardar: o Firebase fala com o reCAPTCHA pelo próprio projeto do Google
+ * Cloud — por isso a chave precisa ter sido criada no MESMO projeto
+ * (agendia-5dfef).
  */
-export const APP_CHECK_SITE_KEY = "";
+export const APP_CHECK_SITE_KEY = "6LdBhcMtAAAAANhd3unoGffGUYnbSKHOh_A43IrE";
 
 /** Versão do SDK carregada do CDN do Google (modo "firebase"). */
 export const VERSAO_SDK = "12.17.1";

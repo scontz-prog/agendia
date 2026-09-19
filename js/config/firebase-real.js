@@ -53,11 +53,13 @@ const app = initializeApp(firebaseConfig);
  * falso pelo link público.
  */
 if (APP_CHECK_SITE_KEY) {
-  const { initializeAppCheck, ReCaptchaV3Provider } = await import(
+  const { initializeAppCheck, ReCaptchaEnterpriseProvider } = await import(
     "https://www.gstatic.com/firebasejs/12.17.1/firebase-app-check.js"
   );
   initializeAppCheck(app, {
-    provider: new ReCaptchaV3Provider(APP_CHECK_SITE_KEY),
+    // reCAPTCHA Enterprise: o v3 comum foi descontinuado pelo Google e o
+    // console do App Check já não aceita registrar app com ele.
+    provider: new ReCaptchaEnterpriseProvider(APP_CHECK_SITE_KEY),
     isTokenAutoRefreshEnabled: true,
   });
 }
