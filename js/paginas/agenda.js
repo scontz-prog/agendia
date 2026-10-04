@@ -33,6 +33,7 @@ import { listarClientes, salvarCliente } from "../dados/clientes.js";
 import { listarBloqueiosDoDia } from "../dados/bloqueios.js";
 import {
   listarAgendamentosDoDia,
+  listarAgendamentosDoPeriodo,
   criarAgendamento,
   atualizarStatus,
   excluirAgendamento,
@@ -55,12 +56,16 @@ export async function telaAgenda({ container, params, ehAtual }) {
 
   container.append(carregando("Carregando a agenda…"));
 
-  const [todosBarbeiros, servicos, clientes, agendamentos, bloqueios] = await Promise.all([
+  const mes = dia.slice(0, 7);
+  const [todosBarbeiros, servicos, clientes, agendamentos, bloqueios, doMes] = await Promise.all([
     listarBarbeiros(barbearia.id, { somenteAtivos: true }),
     listarServicos(barbearia.id, { somenteAtivos: true }),
     listarClientes(barbearia.id),
     listarAgendamentosDoDia(barbearia.id, dia),
     listarBloqueiosDoDia(barbearia.id, dia),
+    // o mês inteiro só para saber QUAIS dias têm atendimento — é uma
+    // consulta de intervalo no mesmo campo `dia`, sem índice composto
+    listarAgendamentosDoPeriodo(barbearia.id, `${mes}-01`, `${mes}-31`),
   ]);
 
   if (!ehAtual()) return;
@@ -86,7 +91,16 @@ export async function telaAgenda({ container, params, ehAtual }) {
   }
 
   const expediente = expedienteDoDia(barbearia, diaDaSemana(dia));
-  const estado = { barbearia, dia, hoje, barbeiros, servicos, clientes, agendamentos, bloqueios, expediente };
+  // Quantos atendimentos ativos por dia do mês — é o que pinta o
+  // calendário. Para o barbeiro, só os dele: a agenda que ele enxerga.
+  const porDia = new Map();
+  for (const a of doMes) {
+    if (a.status === "cancelado") continue;
+    if (soMinhaAgenda && a.barbeiroId !== perfil.barbeiroId) continue;
+    porDia.set(a.dia, (porDia.get(a.dia) ?? 0) + 1);
+  }
+
+  const estado = { barbearia, dia, hoje, barbeiros, servicos, clientes, agendamentos, bloqueios, expediente, porDia };
 
   render(
     container,
@@ -104,6 +118,7 @@ export async function telaAgenda({ container, params, ehAtual }) {
           )
         : null,
     ]),
+    calendarioDoMes(estado),
     barraDeDias(estado),
     barbeiros.length === 0
       ? vazio(
@@ -118,6 +133,77 @@ export async function telaAgenda({ container, params, ehAtual }) {
       : grade(estado),
     barbeiros.length ? legenda(barbeiros) : null,
   );
+}
+
+/* ------------------------------------------------------------------ */
+/* Calendário do mês                                                   */
+/*                                                                     */
+/* Antes só dava para saber se um dia tinha atendimento entrando nele.  */
+/* Aqui o mês inteiro aparece de uma vez, e o que interessa é achado    */
+/* pela cor: dia com atendimento vem marcado, com a quantidade.         */
+/* ------------------------------------------------------------------ */
+const DIAS_CURTOS = ["D", "S", "T", "Q", "Q", "S", "S"];
+
+function calendarioDoMes({ dia, hoje, porDia }) {
+  const [ano, mes] = dia.split("-").map(Number);
+  const primeiro = new Date(Date.UTC(ano, mes - 1, 1));
+  const diasNoMes = new Date(Date.UTC(ano, mes, 0)).getUTCDate();
+  const ir = (novo) => irPara(`/agenda?dia=${novo}`);
+
+  const celulas = [];
+  // vazios até o primeiro dia cair no dia da semana certo
+  for (let i = 0; i < primeiro.getUTCDay(); i++) {
+    celulas.push(el("span", { class: "dia-mes vazio", "aria-hidden": "true" }));
+  }
+
+  for (let n = 1; n <= diasNoMes; n++) {
+    const data = `${ano}-${String(mes).padStart(2, "0")}-${String(n).padStart(2, "0")}`;
+    const quantos = porDia.get(data) ?? 0;
+    const classes = ["dia-mes"];
+    if (data === dia) classes.push("escolhido");
+    if (data === hoje) classes.push("hoje");
+    if (quantos) classes.push("com-agendamento");
+
+    celulas.push(
+      el(
+        "button",
+        {
+          type: "button",
+          class: classes.join(" "),
+          onclick: () => ir(data),
+          "aria-label": `${n} — ${quantos ? `${quantos} atendimento(s)` : "sem atendimentos"}`,
+          "aria-current": data === dia ? "date" : null,
+        },
+        [
+          el("span", { class: "numero" }, String(n)),
+          quantos ? el("span", { class: "quantos" }, String(quantos)) : null,
+        ],
+      ),
+    );
+  }
+
+  const trocarMes = (passo) => {
+    const d = new Date(Date.UTC(ano, mes - 1 + passo, 1));
+    ir(d.toISOString().slice(0, 10));
+  };
+
+  return el("section", { class: "calendario" }, [
+    el("div", { class: "calendario-topo" }, [
+      el("button", { class: "navegar", type: "button", "aria-label": "Mês anterior", onclick: () => trocarMes(-1) }, "‹"),
+      el("p", { class: "mes-nome" }, mesPorExtenso(dia)),
+      el("button", { class: "navegar", type: "button", "aria-label": "Próximo mês", onclick: () => trocarMes(1) }, "›"),
+    ]),
+    el("div", { class: "calendario-grade" }, [
+      ...DIAS_CURTOS.map((d, i) => el("span", { class: "cabecalho-dia", "aria-hidden": "true", key: i }, d)),
+      ...celulas,
+    ]),
+  ]);
+}
+
+function mesPorExtenso(dia) {
+  const d = new Date(`${dia}T12:00:00Z`);
+  const texto = d.toLocaleDateString("pt-BR", { month: "long", year: "numeric", timeZone: "UTC" });
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
 
 /* ------------------------------------------------------------------ */

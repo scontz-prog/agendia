@@ -48,6 +48,13 @@
   --superficie: #0b3d2e;
   --superficie-2: #0f4a38;
   --superficie-3: #145844;
+  /* Lateral e barra inferior: grafite levemente esverdeado. É cinza —
+     dessaturado o bastante para o verde das telas respirar —, mas puxado
+     para o verde da marca, para não parecer um pedaço de outro sistema
+     colado ao lado. */
+  --lateral: #1c2422;
+  --lateral-2: #26302d;
+  --lateral-borda: #303c39;
   --borda: #1b6a52;
   --borda-forte: #2a8468;
 

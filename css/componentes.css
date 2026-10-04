@@ -57,11 +57,11 @@
   color: var(--texto);
 }
 
-/* Sair precisa ser achado sem procurar, e a aparência tem que dizer
-   "isto encerra a sessão" antes da leitura. Contorno vermelho faz isso
-   sem gritar como um botão sólido faria numa barra que fica na tela o
-   dia inteiro — e vermelho, não laranja: o laranja é a cor de AÇÃO da
-   interface, e sair não é a ação que se quer convidar. */
+/* Sair usa o mesmo desenho dos demais botões da barra — mesma altura,
+   mesma borda, mesmo raio. Antes era o único com contorno vermelho, e
+   destoava de tudo à volta. O vermelho ficou só no hover: aparece na
+   intenção de clicar, que é quando a informação "isto encerra a sessão"
+   é útil, sem pintar de alerta uma barra que fica na tela o dia inteiro. */
 .btn-sair {
   display: inline-flex;
   align-items: center;
@@ -69,12 +69,12 @@
   gap: 7px;
   min-height: 40px;
   padding: 8px 16px;
-  border: 1px solid color-mix(in srgb, var(--erro) 55%, transparent);
+  border: 1px solid var(--borda);
   border-radius: var(--raio-sm);
-  background: color-mix(in srgb, var(--erro) 14%, transparent);
-  color: var(--erro);
+  background: var(--superficie-2);
+  color: var(--texto);
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 500;
   transition:
     background-color 0.15s,
     color 0.15s,
@@ -82,9 +82,9 @@
 }
 
 .btn-sair:hover {
-  background: var(--erro);
-  border-color: var(--erro);
-  color: #2a0808;
+  background: color-mix(in srgb, var(--erro) 16%, var(--superficie-2));
+  border-color: color-mix(in srgb, var(--erro) 55%, transparent);
+  color: var(--erro);
 }
 
 .btn-perigo {

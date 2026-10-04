@@ -243,3 +243,118 @@
   align-items: center;
   gap: 6px;
 }
+
+/* ------------------------------------------------------------------ */
+/* Calendário do mês                                                   */
+/*                                                                     */
+/* Cabe acima da grade do dia sem empurrá-la para fora da tela: célula  */
+/* quadrada e compacta. O que a pessoa procura aqui é uma coisa só —    */
+/* "que dias têm gente marcada" —, e isso é respondido pela cor, antes  */
+/* de qualquer leitura.                                                 */
+/* ------------------------------------------------------------------ */
+.calendario {
+  margin-bottom: 14px;
+  padding: 12px;
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+}
+
+.calendario-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.calendario-topo .mes-nome {
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.calendario-grade {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendario-grade .cabecalho-dia {
+  padding-bottom: 4px;
+  text-align: center;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--texto-fraco);
+}
+
+.dia-mes {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  border: 1px solid transparent;
+  border-radius: var(--raio-sm);
+  background: transparent;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--texto-suave);
+  cursor: pointer;
+  transition: background-color 0.12s, border-color 0.12s;
+}
+
+.dia-mes.vazio {
+  cursor: default;
+}
+
+.dia-mes:not(.vazio):hover {
+  background: var(--superficie-2);
+}
+
+/* Dia com atendimento: fundo laranja suave e o número em destaque. É o
+   único uso de cor forte na grade — se todo dia tivesse cor, nenhum
+   teria. */
+.dia-mes.com-agendamento {
+  background: color-mix(in srgb, var(--destaque) 14%, transparent);
+  color: var(--texto);
+  font-weight: 600;
+}
+
+.dia-mes.com-agendamento:hover {
+  background: color-mix(in srgb, var(--destaque) 24%, transparent);
+}
+
+/* Hoje é contorno, não preenchimento: precisa ser localizável sem
+   competir com a informação de ocupação. */
+.dia-mes.hoje {
+  border-color: var(--borda-forte);
+}
+
+.dia-mes.escolhido {
+  background: var(--destaque);
+  border-color: var(--destaque);
+  color: var(--destaque-contraste);
+  font-weight: 600;
+}
+
+/* Quantidade no canto: some no celular estreito, onde o espaço é do
+   número do dia — a cor já diz que há atendimento. */
+.dia-mes .quantos {
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--destaque);
+}
+
+.dia-mes.escolhido .quantos {
+  color: var(--destaque-contraste);
+}
+
+@media (max-width: 380px) {
+  .dia-mes .quantos {
+    display: none;
+  }
+}

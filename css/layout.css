@@ -378,8 +378,9 @@
   right: 0;
   z-index: 40;
   display: flex;
-  background: var(--superficie);
-  border-top: 1px solid var(--borda);
+  /* mesma cor da lateral: no celular ela É a lateral */
+  background: var(--lateral);
+  border-top: 1px solid var(--lateral-borda);
   padding-bottom: env(safe-area-inset-bottom);
 }
 
@@ -463,8 +464,8 @@
     width: var(--largura-lateral);
     flex-shrink: 0;
     padding: 18px 14px;
-    background: var(--superficie);
-    border-right: 1px solid var(--borda);
+    background: var(--lateral);
+    border-right: 1px solid var(--lateral-borda);
   }
 
   /* No desktop a marca da plataforma mora no topo da coluna lateral —
@@ -491,7 +492,7 @@
   }
 
   .app-lateral nav a:hover {
-    background: var(--superficie-2);
+    background: var(--lateral-2);
     color: var(--texto);
     text-decoration: none;
   }
