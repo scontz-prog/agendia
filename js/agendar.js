@@ -32,6 +32,7 @@ import { entrarComoVisitante } from "./dados/sessao.js";
 import { obterBarbeariaPorSlug } from "./dados/barbearias.js";
 import { listarBarbeiros } from "./dados/barbeiros.js";
 import { listarServicos } from "./dados/servicos.js";
+import { listarProdutos } from "./dados/produtos.js";
 import { listarBloqueiosDoDia } from "./dados/bloqueios.js";
 import {
   listarReservasDoDia,
@@ -117,14 +118,18 @@ async function iniciar() {
       return;
     }
 
-    const [servicos, barbeiros] = await Promise.all([
+    const [servicos, barbeiros, produtos] = await Promise.all([
       listarServicos(barbearia.id, { somenteAtivos: true }),
       listarBarbeiros(barbearia.id, { somenteAtivos: true }),
+      // A vitrine é enfeite: se a leitura falhar, o agendamento — que é o
+      // motivo da página existir — não pode cair junto.
+      listarProdutos(barbearia.id, { somenteAtivos: true }).catch(() => []),
     ]);
 
     estado.barbearia = barbearia;
     estado.servicos = servicos;
     estado.barbeiros = barbeiros;
+    estado.produtos = produtos;
 
     // Quem já agendou neste aparelho não digita tudo de novo.
     const lembrado = clienteLembrado(slug);
@@ -170,6 +175,7 @@ function desenhar() {
             estado.servico && estado.barbeiro && estado.horario !== null ? passoDados() : null,
           ]),
     meusAgendamentos(),
+    vitrineProdutos(),
     assinaturaAgendia(),
   );
 }
@@ -606,6 +612,48 @@ function meusAgendamentos() {
     el("p", { class: "fraco pequeno", style: { marginTop: "10px" } },
       `O cancelamento deve ser feito com no mínimo ${HORAS_MINIMAS_CANCELAMENTO} horas ` +
         "de antecedência. Depois disso, fale direto com o estabelecimento."),
+  ]);
+}
+
+/**
+ * Catálogo do balcão, no fim da página.
+ *
+ * Fica embaixo de propósito: quem abriu este link veio marcar horário, e
+ * produto antes do primeiro passo seria propaganda atravessada no
+ * caminho. Depois de marcar, é uma vitrine bem-vinda — e não há carrinho
+ * nem preço clicável, porque a venda acontece no balcão.
+ */
+function vitrineProdutos() {
+  const produtos = estado.produtos ?? [];
+  if (produtos.length === 0) return null;
+
+  return el("section", { class: "cartao passo", style: { marginTop: "24px" } }, [
+    el("h2", { class: "passo-titulo" }, [
+      el("span", { class: "passo-numero pronto", "aria-hidden": "true" }, "🛍️"),
+      "À venda no balcão",
+    ]),
+
+    el(
+      "div",
+      { class: "catalogo", style: { marginTop: "12px" } },
+      produtos.map((p) =>
+        el("article", { class: "produto" }, [
+          el("div", { class: "produto-foto" }, [
+            p.fotoUrl
+              ? el("img", { src: p.fotoUrl, alt: p.nome, loading: "lazy" })
+              : el("span", { class: "sem-foto", "aria-hidden": "true" }, "📦"),
+          ]),
+          el("div", { class: "produto-corpo" }, [
+            el("h3", {}, p.nome),
+            p.descricao ? el("p", { class: "pequeno suave" }, p.descricao) : null,
+            el("p", { class: "preco num" }, moeda(p.precoCentavos)),
+          ]),
+        ]),
+      ),
+    ),
+
+    el("p", { class: "fraco pequeno", style: { marginTop: "12px" } },
+      "Os produtos são vendidos no local — reserve com o estabelecimento se quiser garantir o seu."),
   ]);
 }
 

@@ -174,15 +174,25 @@ Ordem sugerida para o link público começar a funcionar:
 **aprovar a conta → Profissionais → Serviços → copiar o link em
 Configurações.**
 
-## Etapa 5 — Lembrete automático por e-mail (opcional)
+## Etapa 5 — Avisos automáticos por e-mail (opcional)
 
-O painel é estático: fechado o navegador, nada dele roda. Quem envia o
-lembrete da véspera é uma **Cloud Function** — código seu, hospedado no
-Google, que acorda de hora em hora. O site continua igual, no GitHub
-Pages; ele só grava a configuração.
+O painel é estático: fechado o navegador, nada dele roda. Quem envia os
+avisos é uma **Cloud Function** — código seu, hospedado no Google. O site
+continua igual, no GitHub Pages; ele só grava a configuração.
 
 Pule esta etapa se ainda não quiser envio automático. Todo o resto
 funciona sem ela.
+
+### O que o sistema envia
+
+| Quando | Para quem | Liga/desliga |
+|---|---|---|
+| Agendamento criado | Cliente — confirmação com data, horário e profissional | Configurações › Notificações |
+| Agendamento criado **pelo link público** | Estabelecimento — aviso com os dados do minicadastro | idem |
+| Algumas horas antes do horário | Cliente — lembrete | idem (desligado por padrão) |
+| Cancelamento | O lado que **não** cancelou: cliente cancelou pelo link → avisa o estabelecimento (e manda recibo a quem cancelou); estabelecimento cancelou pelo painel → avisa o cliente, com o link para remarcar | idem |
+
+O WhatsApp continua manual, de propósito — ver *Central de mensagens*.
 
 ### O que é preciso ter antes
 
@@ -196,12 +206,16 @@ funciona sem ela.
 
 ```bash
 cd functions && npm install && cd ..
-firebase functions:secrets:set RESEND_API_KEY
+firebase functions:secrets:set EMAIL_SEGREDO
 firebase deploy --only functions
 ```
 
-O remetente vai em `EMAIL_REMETENTE` (formato `Agendia <avisos@seudominio.com.br>`),
-pedido no primeiro deploy. A resposta do cliente vai para o e-mail do
+`EMAIL_SEGREDO` é a senha de app do Gmail ou a chave da Resend, conforme
+`EMAIL_PROVEDOR` (`gmail` por padrão). O remetente vai em
+`EMAIL_REMETENTE` — o endereço da conta, no Gmail, ou
+`Agendia <avisos@seudominio.com.br>`, na Resend. `SITE_BASE` é o endereço
+do site publicado e só é usado como reserva, para montar o link de
+remarcação de quem nunca abriu a tela de notificações. A resposta do cliente vai para o e-mail do
 estabelecimento, não para a plataforma — quem responde "posso remarcar?"
 está falando com o salão.
 
@@ -293,6 +307,8 @@ js/
     barbearias.js       onboarding, dados e expediente
     barbeiros.js  servicos.js  clientes.js  bloqueios.js
     agendamentos.js     agendamentos, horários livres e a trava de horário
+    despesas.js         o caderno de despesas que alimenta o Financeiro
+    produtos.js         catálogo do balcão (aparece também no link público)
   paginas/              uma tela do painel por arquivo
   entrar.js  painel.js  agendar.js    pontos de entrada
 

@@ -28,7 +28,7 @@
  */
 
 import { onSchedule } from "firebase-functions/v2/scheduler";
-import { onDocumentCreated } from "firebase-functions/v2/firestore";
+import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/firestore";
 import { defineSecret, defineString } from "firebase-functions/params";
 import { logger } from "firebase-functions";
 import { initializeApp } from "firebase-admin/app";
@@ -43,6 +43,9 @@ import {
   TEXTO_CONFIRMACAO,
   TEXTO_LEMBRETE,
   textoAvisoEmpresa,
+  TEXTO_CANCELADO_PELA_EMPRESA,
+  TEXTO_CANCELAMENTO_RECEBIDO,
+  textoCancelamentoEmpresa,
 } from "./texto.js";
 
 initializeApp();
@@ -79,8 +82,25 @@ const REMETENTE = defineString("EMAIL_REMETENTE");
  */
 const SEGREDO = defineSecret("EMAIL_SEGREDO");
 
+/**
+ * Endereço do site publicado, sem barra no fim.
+ *
+ * Serve só de reserva: o painel grava o link de agendamento junto com as
+ * notificações, e é esse que vale. Mas o aviso de cancelamento sai mesmo
+ * de quem nunca abriu aquela tela — e um e-mail dizendo "remarque por
+ * aqui" sem o "aqui" é pior do que não convidar.
+ */
+const SITE = defineString("SITE_BASE", { default: "https://scontz-prog.github.io/agendia" });
+
 /** Nome que aparece como remetente na caixa de entrada. */
 const NOME_REMETENTE = "Agendia";
+
+/** O link público da conta: o gravado pelo painel, ou o montado do slug. */
+function linkDaConta(barbearia, cfg) {
+  if (cfg?.linkPublico) return cfg.linkPublico;
+  if (!barbearia?.slug) return "";
+  return `${String(SITE.value()).replace(/\/+$/, "")}/agendar.html?b=${barbearia.slug}`;
+}
 
 /** Trava de custo: de quantas contas cuidar por execução do lembrete. */
 const MAX_CONTAS = 200;
@@ -204,7 +224,7 @@ export const aoCriarAgendamento = onDocumentCreated(
     if (!contaPodeEnviar(barbearia)) return;
 
     const cfg = barbearia.lembretes ?? {};
-    const valores = valoresDo(a, { nome: a.clienteNome }, barbearia, cfg.linkPublico || "");
+    const valores = valoresDo(a, { nome: a.clienteNome }, barbearia, linkDaConta(barbearia, cfg));
     const emailEmpresa = emailValido(cfg.emailAvisos) ? cfg.emailAvisos : barbearia.email;
     const base = { clienteId: a.clienteId ?? null, clienteNome: a.clienteNome ?? null, agendamentoId: aid };
 
@@ -238,7 +258,90 @@ export const aoCriarAgendamento = onDocumentCreated(
 );
 
 /* ------------------------------------------------------------------ */
-/* 3 — Lembrete algumas horas antes do horário                         */
+/* 3 — Cancelamento: avisa o lado que não cancelou                     */
+/*                                                                     */
+/* Dispara na passagem para "cancelado", não em toda gravação do       */
+/* documento: liberar os blocos da agenda é uma segunda escrita no     */
+/* mesmo agendamento, e sem essa checagem o cliente levaria dois       */
+/* e-mails do mesmo cancelamento.                                      */
+/* ------------------------------------------------------------------ */
+
+export const aoCancelarAgendamento = onDocumentUpdated(
+  {
+    document: "barbearias/{bid}/agendamentos/{aid}",
+    region: REGIAO,
+    secrets: [SEGREDO],
+    retry: false,
+  },
+  async (evento) => {
+    const { bid, aid } = evento.params;
+    const antes = evento.data?.before?.data();
+    const depois = evento.data?.after?.data();
+    if (!antes || !depois) return;
+    if (antes.status === "cancelado" || depois.status !== "cancelado") return;
+
+    const a = { id: aid, ...depois };
+
+    const snap = await db.doc(`barbearias/${bid}`).get();
+    const barbearia = snap.exists ? { id: bid, ...snap.data() } : null;
+    if (!contaPodeEnviar(barbearia)) return;
+
+    const cfg = barbearia.lembretes ?? {};
+    if (cfg.cancelamentos === false) return;
+
+    const valores = valoresDo(a, { nome: a.clienteNome }, barbearia, linkDaConta(barbearia, cfg));
+    const emailEmpresa = emailValido(cfg.emailAvisos) ? cfg.emailAvisos : barbearia.email;
+    const base = { clienteId: a.clienteId ?? null, clienteNome: a.clienteNome ?? null, agendamentoId: aid };
+
+    // Quem cancelou foi o cliente, pelo link público
+    if (a.canceladoPeloCliente) {
+      if (emailValido(emailEmpresa)) {
+        const { assunto, texto } = textoCancelamentoEmpresa(a, barbearia);
+        await registrarEEnviar({
+          bid,
+          idRegistro: `cancelamento_empresa_${aid}`,
+          para: emailEmpresa,
+          assunto,
+          texto,
+          responderPara: emailValido(a.clienteEmail) ? a.clienteEmail : null,
+          extra: { ...base, tipo: "cancelamento_empresa", destinatario: "estabelecimento" },
+        });
+      }
+
+      // Recibo para quem cancelou: confirma que deu certo. Sem ele, quem
+      // clicou e não viu nada volta ao link para conferir — ou liga.
+      if (emailValido(a.clienteEmail)) {
+        await registrarEEnviar({
+          bid,
+          idRegistro: `cancelamento_recibo_${aid}`,
+          para: a.clienteEmail,
+          assunto: aplicarVariaveis(TEXTO_CANCELAMENTO_RECEBIDO.assunto, valores),
+          texto: aplicarVariaveis(TEXTO_CANCELAMENTO_RECEBIDO.texto, valores),
+          responderPara: emailValido(emailEmpresa) ? emailEmpresa : null,
+          extra: { ...base, tipo: "cancelamento_recibo" },
+        });
+      }
+      return;
+    }
+
+    // Cancelou o estabelecimento: quem precisa saber é o cliente. Não
+    // mandamos aviso para a empresa — ela acabou de fazer isso no painel.
+    if (emailValido(a.clienteEmail)) {
+      await registrarEEnviar({
+        bid,
+        idRegistro: `cancelamento_cliente_${aid}`,
+        para: a.clienteEmail,
+        assunto: aplicarVariaveis(TEXTO_CANCELADO_PELA_EMPRESA.assunto, valores),
+        texto: aplicarVariaveis(TEXTO_CANCELADO_PELA_EMPRESA.texto, valores),
+        responderPara: emailValido(emailEmpresa) ? emailEmpresa : null,
+        extra: { ...base, tipo: "cancelamento_cliente" },
+      });
+    }
+  },
+);
+
+/* ------------------------------------------------------------------ */
+/* 4 — Lembrete algumas horas antes do horário                         */
 /* ------------------------------------------------------------------ */
 
 export const lembretesPorEmail = onSchedule(
@@ -318,7 +421,7 @@ async function lembrarConta(barbearia) {
     // Quem pediu para não receber, não recebe — inclusive no automático.
     if (ficha?.aceitaMensagens === false) continue;
 
-    const valores = valoresDo(a, ficha ?? { nome: a.clienteNome }, barbearia, cfg.linkPublico || "");
+    const valores = valoresDo(a, ficha ?? { nome: a.clienteNome }, barbearia, linkDaConta(barbearia, cfg));
     const resultado = await registrarEEnviar({
       bid: barbearia.id,
       idRegistro: `lembrete_${a.id}`,

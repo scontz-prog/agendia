@@ -373,6 +373,8 @@
 
 .app-nav {
   position: fixed;
+  overflow-x: auto;
+  scrollbar-width: none;
   bottom: 0;
   left: 0;
   right: 0;
@@ -385,10 +387,12 @@
 }
 
 .app-nav a {
-  flex: 1;
-  /* com 6 itens em 360px cada um fica com 60px: o rótulo precisa poder
-     encolher sem empurrar a barra para fora da tela */
-  min-width: 0;
+  /* Cresce para ocupar a barra quando sobra espaço, mas nunca encolhe
+     abaixo de 62px: com nove itens num celular estreito, dividir por
+     igual deixaria "Clientes" virando "Cli…". Preferimos que a barra
+     role de lado — o item cortado na borda avisa que há mais. */
+  flex: 1 0 auto;
+  min-width: 62px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -406,6 +410,10 @@
 
 .app-nav a:hover {
   text-decoration: none;
+}
+
+.app-nav::-webkit-scrollbar {
+  display: none;
 }
 
 .app-nav .icone {

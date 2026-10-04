@@ -20,6 +20,9 @@ import {
   TEXTO_CONFIRMACAO,
   TEXTO_LEMBRETE,
   textoAvisoEmpresa,
+  TEXTO_CANCELADO_PELA_EMPRESA,
+  TEXTO_CANCELAMENTO_RECEBIDO,
+  textoCancelamentoEmpresa,
 } from "./texto.js";
 
 let passou = 0;
@@ -200,7 +203,12 @@ const ag = {
 };
 const est = { nome: "Salão Teste", whatsapp: "79999990000" };
 
-for (const [nome, t] of [["confirmação", TEXTO_CONFIRMACAO], ["lembrete", TEXTO_LEMBRETE]]) {
+for (const [nome, t] of [
+  ["confirmação", TEXTO_CONFIRMACAO],
+  ["lembrete", TEXTO_LEMBRETE],
+  ["cancelado pela empresa", TEXTO_CANCELADO_PELA_EMPRESA],
+  ["recibo de cancelamento", TEXTO_CANCELAMENTO_RECEBIDO],
+]) {
   teste(`${nome}: nenhuma variável sobra sem trocar`, () => {
     const v = valoresDo(ag, { nome: ag.clienteNome }, est, "");
     const saida = aplicarVariaveis(t.assunto, v) + "\n" + aplicarVariaveis(t.texto, v);
@@ -218,6 +226,29 @@ teste("aviso à empresa traz os dados do minicadastro", () => {
 });
 
 
+
+teste("cancelamento pela empresa convida a remarcar pelo link", () => {
+  const v = valoresDo(ag, { nome: ag.clienteNome }, est, "https://exemplo.com/agendar?b=salao");
+  const texto = aplicarVariaveis(TEXTO_CANCELADO_PELA_EMPRESA.texto, v);
+  assert.ok(texto.includes("https://exemplo.com/agendar?b=salao"), texto);
+  assert.ok(texto.includes("remarcar"), texto);
+});
+
+teste("recibo não repete o convite de remarcar como se fosse novidade", () => {
+  const v = valoresDo(ag, { nome: ag.clienteNome }, est, "https://exemplo.com/agendar?b=salao");
+  const texto = aplicarVariaveis(TEXTO_CANCELAMENTO_RECEBIDO.texto, v);
+  assert.ok(texto.includes("registrado"), texto);
+  assert.ok(!texto.includes("foi cancelado"), texto);
+});
+
+teste("aviso de cancelamento à empresa diz quem cancelou e qual horário abriu", () => {
+  const { assunto, texto } = textoCancelamentoEmpresa(ag, est);
+  assert.ok(assunto.startsWith("Cancelamento: Ana Paula Souza"), assunto);
+  for (const trecho of ["(79) 98877-6655", "ana@exemplo.com", "10:00", "livre"]) {
+    assert.ok(texto.includes(trecho), `faltou "${trecho}" em:
+${texto}`);
+  }
+});
 
 console.log(`
 ${passou} teste(s) passaram.

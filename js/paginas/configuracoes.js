@@ -120,6 +120,10 @@ function secaoLembretes(barbearia, modelos, gestor) {
         "Me avisar por e-mail a cada agendamento feito pelo link",
         "Os lançados aqui no painel não geram aviso — você mesmo acabou de marcar."),
 
+      caixa("cancelamentos", cfg.cancelamentos !== false,
+        "Avisar por e-mail quando um horário for cancelado",
+        `Se o ${T.cliente} cancelar pelo link, o aviso vem para você; se o cancelamento partir do painel, ele avisa o ${T.cliente}.`),
+
       grupo("E-mail que recebe os avisos",
         el("input", {
           class: "campo", name: "emailAvisos", type: "email",
@@ -162,6 +166,7 @@ function secaoLembretes(barbearia, modelos, gestor) {
     const config = {
       confirmacaoCliente: marcado("confirmacaoCliente"),
       avisoEmpresa: marcado("avisoEmpresa"),
+      cancelamentos: marcado("cancelamentos"),
       emailAvisos: dados.emailAvisos,
       ativo: marcado("ativo"),
       antecedenciaHoras: dados.antecedenciaHoras,

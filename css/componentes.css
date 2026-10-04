@@ -1062,3 +1062,83 @@ select.campo {
 .legenda-evolucao .ponto.despesa {
   background: var(--destaque);
 }
+
+/* ---------------------------------------------------------------- */
+/* catálogo de produtos                                              */
+/* ---------------------------------------------------------------- */
+.catalogo {
+  display: grid;
+  /* auto-fill com mínimo de 140px: duas colunas já cabem na largura
+     útil de um celular de 375px (dentro do cartão da página pública), e
+     no desktop entram quantas couberem — sem ponto de quebra na mão */
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.produto {
+  display: flex;
+  flex-direction: column;
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  overflow: hidden;
+}
+
+.produto.inativo {
+  opacity: 0.55;
+}
+
+.produto-foto {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  background: var(--superficie-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.produto-foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.produto-foto .sem-foto {
+  font-size: 2rem;
+  opacity: 0.5;
+}
+
+.produto-foto .etiqueta {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+}
+
+.produto-corpo {
+  /* cresce para ocupar o cartão: com descrições de tamanhos diferentes,
+     é o que mantém preço e botão alinhados de um cartão para o outro */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+}
+
+.produto-corpo h3 {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.produto-corpo .preco {
+  margin-top: auto;
+  padding-top: 6px;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--destaque);
+}
+
+.produto-corpo .btn {
+  margin-top: 10px;
+}

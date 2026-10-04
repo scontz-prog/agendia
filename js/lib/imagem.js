@@ -40,6 +40,18 @@ export const PERFIL_FOTO = {
 };
 
 /**
+ * Foto de produto. Quadrada de propósito: num catálogo em grade, uma
+ * imagem em pé ao lado de uma deitada desalinha a linha inteira, e o
+ * recorte central costuma acertar o produto.
+ */
+export const PERFIL_PRODUTO = {
+  maxLargura: 400,
+  maxAltura: 400,
+  quadrado: true,
+  rotulo: "foto do produto",
+};
+
+/**
  * Lê o arquivo escolhido e devolve um data URI pronto para gravar.
  * Lança Error com mensagem em português quando algo não serve.
  */

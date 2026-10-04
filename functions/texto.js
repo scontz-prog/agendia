@@ -208,3 +208,71 @@ export function textoAvisoEmpresa(a, barbearia) {
     ].join("\n"),
   };
 }
+
+/* ------------------------------------------------------------------ */
+/* Cancelamento                                                        */
+/*                                                                     */
+/* Cancelar tem dois lados e cada um precisa de um texto diferente.    */
+/* Quem cancelou já sabe que cancelou: para essa pessoa o e-mail é     */
+/* recibo, curto. Quem foi avisado precisa saber o que aconteceu com o */
+/* horário dela e o que fazer agora — por isso este texto convida a    */
+/* remarcar, e o recibo não.                                           */
+/* ------------------------------------------------------------------ */
+
+/** Vai para o cliente quando o estabelecimento cancelou. */
+export const TEXTO_CANCELADO_PELA_EMPRESA = {
+  assunto: "Seu horário foi cancelado — {estabelecimento}",
+  texto: [
+    "Olá, {nome}.",
+    "",
+    "Seu horário na {estabelecimento} foi cancelado:",
+    "",
+    "{data} às {hora}",
+    "{servico} com {profissional}",
+    "",
+    "Se quiser remarcar, é só escolher um novo horário por aqui:",
+    "{link}",
+    "",
+    "Qualquer dúvida, fale com a gente pelo {telefone_estabelecimento}.",
+    "",
+    "{estabelecimento}",
+  ].join("\n"),
+};
+
+/** Vai para o cliente que cancelou sozinho pelo link. É só recibo. */
+export const TEXTO_CANCELAMENTO_RECEBIDO = {
+  assunto: "Cancelamento confirmado — {estabelecimento}",
+  texto: [
+    "Olá, {nome}.",
+    "",
+    "Seu cancelamento foi registrado. O horário abaixo está livre de novo:",
+    "",
+    "{data} às {hora}",
+    "{servico} com {profissional}",
+    "",
+    "Quando quiser marcar outro, o link é este:",
+    "{link}",
+    "",
+    "{estabelecimento}",
+  ].join("\n"),
+};
+
+/** Vai para o estabelecimento quando foi o cliente que cancelou. */
+export function textoCancelamentoEmpresa(a, barbearia) {
+  const quando = `${dataLonga(a.dia)} às ${minutosParaHora(a.inicioMin)}`;
+  return {
+    assunto: `Cancelamento: ${a.clienteNome ?? "cliente"} — ${quando}`,
+    texto: [
+      `${a.clienteNome ?? "Um cliente"} cancelou pelo link de ${barbearia?.nome ?? "seu estabelecimento"}.`,
+      "",
+      `Telefone: ${telefoneFormatado(a.clienteTelefone) || "—"}`,
+      `E-mail: ${a.clienteEmail ?? "—"}`,
+      "",
+      `${a.servicoNome ?? ""} com ${a.barbeiroNome ?? ""}`,
+      quando,
+      `Valor: ${moeda(a.precoCentavos)}`,
+      "",
+      "O horário já voltou a aparecer como livre no link de agendamento.",
+    ].join("\n"),
+  };
+}

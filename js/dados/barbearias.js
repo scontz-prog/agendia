@@ -169,6 +169,7 @@ export async function salvarLembretes(bid, config) {
     lembretes: {
       confirmacaoCliente: config.confirmacaoCliente !== false,
       avisoEmpresa: config.avisoEmpresa !== false,
+      cancelamentos: config.cancelamentos !== false,
       emailAvisos: email || null,
       ativo: Boolean(config.ativo),
       antecedenciaHoras: Number.isFinite(horas) ? Math.min(48, Math.max(1, horas)) : 2,

@@ -14,6 +14,7 @@ import { telaClientes } from "./paginas/clientes.js";
 import { telaMensagens } from "./paginas/mensagens.js";
 import { telaServicos } from "./paginas/servicos.js";
 import { telaFinanceiro } from "./paginas/financeiro.js";
+import { telaProdutos } from "./paginas/produtos.js";
 import { telaBarbeiros } from "./paginas/barbeiros.js";
 import { telaConfiguracoes } from "./paginas/configuracoes.js";
 import { telaEquipe } from "./paginas/equipe.js";
@@ -170,6 +171,7 @@ function montar(ctx) {
     registrar("/mensagens", telaMensagens);
     registrar("/servicos", telaServicos);
     registrar("/financeiro", telaFinanceiro);
+    registrar("/produtos", telaProdutos);
     registrar("/barbeiros", telaBarbeiros);
     registrar("/config", telaConfiguracoes);
     if (perfil.papel === "dono") registrar("/equipe", telaEquipe);
@@ -185,8 +187,8 @@ function montar(ctx) {
  */
 function ajustarNavegacao(perfil) {
   const permitido = {
-    dono: ["/", "/agenda", "/clientes", "/mensagens", "/servicos", "/financeiro", "/barbeiros", "/config", "/equipe"],
-    gerente: ["/", "/agenda", "/clientes", "/mensagens", "/servicos", "/financeiro", "/barbeiros", "/config"],
+    dono: ["/", "/agenda", "/clientes", "/mensagens", "/servicos", "/financeiro", "/produtos", "/barbeiros", "/config", "/equipe"],
+    gerente: ["/", "/agenda", "/clientes", "/mensagens", "/servicos", "/financeiro", "/produtos", "/barbeiros", "/config"],
     barbeiro: ["/agenda"],
   }[perfil.papel] ?? ["/agenda"];
 
@@ -290,6 +292,29 @@ function marcarNavegacao(caminho) {
     if (ativo) link.setAttribute("aria-current", "page");
     else link.removeAttribute("aria-current");
   }
+
+  centralizarNaBarra();
+}
+
+/**
+ * Traz o item atual para o meio da barra inferior.
+ *
+ * A barra rola de lado quando os itens não cabem (celular estreito). Sem
+ * isto, quem abrisse Produtos veria a barra parada no começo, sem marca
+ * nenhuma acesa — e concluiria que o sistema não sabe onde está.
+ */
+function centralizarNaBarra() {
+  const barra = document.querySelector(".app-nav");
+  const ativo = barra?.querySelector('a[aria-current="page"]');
+  if (!barra || !ativo) return;
+  if (barra.scrollWidth <= barra.clientWidth) return;
+
+  // scrollLeft direto, e não scrollIntoView: este último também mexe na
+  // rolagem vertical da página, que acabou de ser zerada pelo roteador.
+  barra.scrollTo({
+    left: ativo.offsetLeft - (barra.clientWidth - ativo.offsetWidth) / 2,
+    behavior: "smooth",
+  });
 }
 
 /* ------------------------------------------------------------------ */
