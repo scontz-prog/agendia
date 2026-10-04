@@ -950,3 +950,115 @@ select.campo {
   color: var(--texto-suave);
   font-size: 0.875rem;
 }
+
+/* ---------------------------------------------------------------- */
+/* financeiro: resultado e evolução                                  */
+/* ---------------------------------------------------------------- */
+.indicador dd.negativo {
+  color: var(--erro);
+}
+
+/* Barras em pé, uma coluna por mês. Sem biblioteca de gráfico: a altura
+   é uma porcentagem do maior valor do período, calculada no JS. */
+.evolucao {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.evolucao .mes-coluna {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 2px;
+  border-radius: var(--raio-sm);
+}
+
+.evolucao .mes-coluna.atual {
+  background: var(--superficie-2);
+}
+
+/* Altura fixa para as barras: sem ela, uma coluna de valor zero
+   encolheria a linha inteira e o gráfico ficaria torto. */
+.evolucao .barras {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 3px;
+  width: 100%;
+  height: 92px;
+}
+
+.evolucao .barra {
+  width: 38%;
+  max-width: 18px;
+  /* um fio de barra para o mês que não teve movimento: zero também é
+     informação, e uma coluna vazia parece erro de carregamento */
+  min-height: 2px;
+  border-radius: 3px 3px 0 0;
+  transition: height 0.25s ease;
+}
+
+.evolucao .barra.receita {
+  background: var(--sucesso);
+}
+
+.evolucao .barra.despesa {
+  background: var(--destaque);
+}
+
+.evolucao .rotulo-mes {
+  font-size: 0.6875rem;
+  color: var(--texto-suave);
+  text-transform: capitalize;
+}
+
+.evolucao .saldo {
+  font-size: 0.625rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.evolucao .saldo.positivo {
+  color: var(--sucesso);
+}
+
+.evolucao .saldo.negativo {
+  color: var(--erro);
+}
+
+.legenda-evolucao {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 12px;
+  font-size: 0.75rem;
+  color: var(--texto-suave);
+}
+
+.legenda-evolucao span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legenda-evolucao .ponto {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.legenda-evolucao .ponto.receita {
+  background: var(--sucesso);
+}
+
+.legenda-evolucao .ponto.despesa {
+  background: var(--destaque);
+}

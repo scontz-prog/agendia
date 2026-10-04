@@ -13,6 +13,7 @@ import { telaAgenda } from "./paginas/agenda.js";
 import { telaClientes } from "./paginas/clientes.js";
 import { telaMensagens } from "./paginas/mensagens.js";
 import { telaServicos } from "./paginas/servicos.js";
+import { telaFinanceiro } from "./paginas/financeiro.js";
 import { telaBarbeiros } from "./paginas/barbeiros.js";
 import { telaConfiguracoes } from "./paginas/configuracoes.js";
 import { telaEquipe } from "./paginas/equipe.js";
@@ -168,6 +169,7 @@ function montar(ctx) {
     registrar("/clientes", telaClientes);
     registrar("/mensagens", telaMensagens);
     registrar("/servicos", telaServicos);
+    registrar("/financeiro", telaFinanceiro);
     registrar("/barbeiros", telaBarbeiros);
     registrar("/config", telaConfiguracoes);
     if (perfil.papel === "dono") registrar("/equipe", telaEquipe);
@@ -183,8 +185,8 @@ function montar(ctx) {
  */
 function ajustarNavegacao(perfil) {
   const permitido = {
-    dono: ["/", "/agenda", "/clientes", "/mensagens", "/servicos", "/barbeiros", "/config", "/equipe"],
-    gerente: ["/", "/agenda", "/clientes", "/mensagens", "/servicos", "/barbeiros", "/config"],
+    dono: ["/", "/agenda", "/clientes", "/mensagens", "/servicos", "/financeiro", "/barbeiros", "/config", "/equipe"],
+    gerente: ["/", "/agenda", "/clientes", "/mensagens", "/servicos", "/financeiro", "/barbeiros", "/config"],
     barbeiro: ["/agenda"],
   }[perfil.papel] ?? ["/agenda"];
 

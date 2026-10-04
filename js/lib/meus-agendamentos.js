@@ -57,3 +57,48 @@ export function esquecer(slug, id) {
   tudo[slug] = (tudo[slug] ?? []).filter((x) => x !== id);
   gravar(tudo);
 }
+
+/* ------------------------------------------------------------------ */
+/* Dados do cliente, para ele não digitar tudo de novo                 */
+/*                                                                     */
+/* Fica NESTE navegador, como a lista acima — não há consulta ao banco */
+/* por telefone, pelo mesmo motivo explicado no topo do arquivo: quem  */
+/* soubesse o número de alguém veria os horários dessa pessoa.         */
+/*                                                                     */
+/* Guardado por estabelecimento, e não uma vez só: o mesmo aparelho    */
+/* pode ser usado para marcar na barbearia com um nome e na clínica da */
+/* mãe com outro.                                                      */
+/* ------------------------------------------------------------------ */
+const CHAVE_CLIENTE = "agendia:dados-cliente";
+
+export function lembrarCliente(slug, { nome, telefone, email }) {
+  try {
+    const tudo = JSON.parse(localStorage.getItem(CHAVE_CLIENTE)) ?? {};
+    tudo[slug] = {
+      nome: String(nome ?? "").trim(),
+      telefone: String(telefone ?? "").trim(),
+      email: String(email ?? "").trim(),
+    };
+    localStorage.setItem(CHAVE_CLIENTE, JSON.stringify(tudo));
+  } catch {
+    // modo privado ou sem espaço: só não haverá preenchimento automático
+  }
+}
+
+export function clienteLembrado(slug) {
+  try {
+    return JSON.parse(localStorage.getItem(CHAVE_CLIENTE))?.[slug] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export function esquecerCliente(slug) {
+  try {
+    const tudo = JSON.parse(localStorage.getItem(CHAVE_CLIENTE)) ?? {};
+    delete tudo[slug];
+    localStorage.setItem(CHAVE_CLIENTE, JSON.stringify(tudo));
+  } catch {
+    /* nada a fazer */
+  }
+}

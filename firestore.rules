@@ -369,6 +369,35 @@ service cloud.firestore {
         allow delete: if gestorAtivo(bid);
       }
 
+      /* --- despesas: dinheiro, só para quem administra ------------- */
+      //
+      // Nem leitura para o profissional: a agenda é o trabalho dele, o
+      // custo do aluguel não. E nada disso é público — ao contrário de
+      // serviços e profissionais, que o link de agendamento precisa ler.
+      match /despesas/{id} {
+        allow read: if gestor(bid);
+        allow create, update: if gestorAtivo(bid)
+                              && texto(request.resource.data.descricao, 2)
+                              && request.resource.data.valorCentavos is int
+                              && request.resource.data.valorCentavos > 0
+                              && ehDia(request.resource.data.dia);
+        allow delete: if gestorAtivo(bid);
+      }
+
+      /* --- produtos: catálogo, leitura pública --------------------- */
+      //
+      // Leitura aberta como a de serviços: é vitrine, e o link de
+      // agendamento mostra o catálogo para o cliente final.
+      match /produtos/{id} {
+        allow read: if true;
+        allow create, update: if gestorAtivo(bid)
+                              && texto(request.resource.data.nome, 2)
+                              && request.resource.data.precoCentavos is int
+                              && request.resource.data.precoCentavos >= 0
+                              && imagemOk(request.resource.data.get('fotoUrl', null));
+        allow delete: if gestorAtivo(bid);
+      }
+
       /* --- modelos de mensagem ------------------------------------ */
       //
       // Nada aqui é público: o texto que o estabelecimento manda para a

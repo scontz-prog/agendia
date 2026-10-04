@@ -47,6 +47,12 @@ export const refAgendamento = (bid, id) => subDoc(bid, "agendamentos", id);
 export const colReservas = (bid) => sub(bid, "reservas");
 export const refReserva = (bid, chave) => subDoc(bid, "reservas", chave);
 
+export const colDespesas = (bid) => sub(bid, "despesas");
+export const refDespesa = (bid, id) => subDoc(bid, "despesas", id);
+
+export const colProdutos = (bid) => sub(bid, "produtos");
+export const refProduto = (bid, id) => subDoc(bid, "produtos", id);
+
 export const colModelos = (bid) => sub(bid, "modelos");
 export const refModelo = (bid, id) => subDoc(bid, "modelos", id);
 

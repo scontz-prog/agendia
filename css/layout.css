@@ -854,3 +854,137 @@
   margin: 8vh auto 0;
   text-align: center;
 }
+
+/* ------------------------------------------------------------------ */
+/* Acabamento da página pública                                        */
+/*                                                                     */
+/* A página é a vitrine do estabelecimento para o cliente final — em    */
+/* muitos casos, o primeiro contato dele com o negócio. O conteúdo já   */
+/* estava certo; o que faltava era hierarquia e acabamento: respiro     */
+/* entre os passos, resposta visível ao toque e um fecho que pareça     */
+/* conclusão, não apenas mais uma tela.                                 */
+/* ------------------------------------------------------------------ */
+.pagina-publica {
+  max-width: 560px;
+}
+
+/* Faixa de abertura: um fundo próprio separa a identidade do
+   estabelecimento do corpo do formulário, sem precisar de imagem. */
+.vitrine-barbearia {
+  position: relative;
+  margin-bottom: 26px;
+  padding: 26px 18px 22px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background:
+    radial-gradient(120% 120% at 50% 0%, color-mix(in srgb, var(--destaque) 10%, transparent) 0%, transparent 60%),
+    var(--superficie);
+}
+
+.vitrine-barbearia .logo-barbearia {
+  padding: 8px;
+  border-radius: var(--raio-sm);
+  background: color-mix(in srgb, var(--fundo) 55%, transparent);
+}
+
+.vitrine-barbearia h1 {
+  letter-spacing: -0.01em;
+}
+
+/* Passos: o que está em aberto ganha um fio laranja à esquerda. Guia o
+   olho para onde falta decidir, em vez de deixar tudo com o mesmo peso. */
+.passo {
+  padding: 18px;
+  margin-bottom: 12px;
+  border-left: 3px solid transparent;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.passo:has(.passo-numero:not(.pronto)) {
+  border-left-color: var(--destaque);
+}
+
+.passo-titulo {
+  font-size: 1rem;
+}
+
+.passo-numero {
+  width: 26px;
+  height: 26px;
+}
+
+/* Opções: resposta ao toque e um certo relevo. A escolhida fica com
+   marca de seleção, não só com a borda colorida — em tela pequena, e
+   sob sol, a borda sozinha passa despercebida. */
+.opcao {
+  padding: 15px;
+  border-radius: var(--raio);
+  transition: border-color 0.15s, background-color 0.15s, transform 0.08s;
+}
+
+.opcao:active {
+  transform: scale(0.99);
+}
+
+.opcao[aria-pressed="true"] {
+  box-shadow: inset 0 0 0 1px var(--destaque);
+}
+
+.opcao[aria-pressed="true"]::after {
+  content: "✓";
+  margin-left: 8px;
+  font-weight: 700;
+  color: var(--destaque);
+}
+
+.opcao .preco {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--destaque) 14%, transparent);
+  color: var(--destaque);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Horários: alvo de toque confortável e seleção inequívoca. */
+.horarios .btn,
+.horarios button {
+  border-radius: var(--raio-sm);
+  transition: transform 0.08s, background-color 0.15s;
+}
+
+.horarios button:active {
+  transform: scale(0.97);
+}
+
+/* Cliente reconhecido pelo navegador. */
+.reconhecido {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--destaque) 35%, transparent);
+  border-radius: var(--raio-sm);
+  background: color-mix(in srgb, var(--destaque) 8%, transparent);
+  font-size: 0.875rem;
+  color: var(--texto-suave);
+}
+
+/* Resumo final e tela de confirmação: o fecho merece peso de fecho. */
+.pagina-publica .resumo {
+  padding: 14px;
+  border-radius: var(--raio-sm);
+  background: color-mix(in srgb, var(--fundo) 45%, transparent);
+  border: 1px solid var(--borda);
+}
+
+@media (min-width: 560px) {
+  .pagina-publica {
+    padding-top: 44px;
+  }
+}

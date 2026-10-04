@@ -42,7 +42,14 @@ import {
   podeCancelar,
   HORAS_MINIMAS_CANCELAMENTO,
 } from "./dados/agendamentos.js";
-import { lembrar, idsGuardados, esquecer } from "./lib/meus-agendamentos.js";
+import {
+  lembrar,
+  idsGuardados,
+  esquecer,
+  lembrarCliente,
+  clienteLembrado,
+  esquecerCliente,
+} from "./lib/meus-agendamentos.js";
 import { registrarClientePublico } from "./dados/clientes.js";
 
 const DIAS_VISIVEIS = 21;
@@ -72,6 +79,7 @@ const estado = {
   erro: null,
   confirmado: null,
   meus: [],
+  reconhecido: false,
 };
 
 iniciar();
@@ -117,6 +125,15 @@ async function iniciar() {
     estado.barbearia = barbearia;
     estado.servicos = servicos;
     estado.barbeiros = barbeiros;
+
+    // Quem já agendou neste aparelho não digita tudo de novo.
+    const lembrado = clienteLembrado(slug);
+    if (lembrado) {
+      estado.nome = lembrado.nome ?? "";
+      estado.telefone = lembrado.telefone ?? "";
+      estado.email = lembrado.email ?? "";
+      estado.reconhecido = Boolean(estado.nome);
+    }
     estado.dia = hojeNaBarbearia(barbearia.timezone);
 
     document.title = `Agendar — ${barbearia.nome}`;
@@ -426,6 +443,13 @@ function passoDados() {
       // guarda no navegador para o cliente poder cancelar depois
       if (idCriado) lembrar(estado.barbearia.slug, idCriado);
 
+      // e guarda os dados dele, para o próximo agendamento já vir pronto
+      lembrarCliente(estado.barbearia.slug, {
+        nome: estado.nome,
+        telefone: estado.telefone,
+        email: estado.email,
+      });
+
       estado.confirmado = { servico, barbeiro, dia, horario };
       desenhar();
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -442,6 +466,32 @@ function passoDados() {
   }
 
   const corpo = el("div", {}, [
+    // Aparelho compartilhado existe: o balcão do salão, o celular da
+    // família. Por isso o reconhecimento vem com uma saída visível, e
+    // não como um preenchimento silencioso que ninguém sabe desfazer.
+    estado.reconhecido
+      ? el("div", { class: "reconhecido" }, [
+          el("span", {}, [
+            "Oi de novo, ",
+            el("strong", {}, String(estado.nome).trim().split(/\s+/)[0]),
+            "! Confira se está tudo certo.",
+          ]),
+          el(
+            "button",
+            {
+              class: "btn btn-fantasma btn-mini",
+              type: "button",
+              onclick: () => {
+                esquecerCliente(estado.barbearia.slug);
+                Object.assign(estado, { nome: "", telefone: "", email: "", reconhecido: false });
+                desenhar();
+              },
+            },
+            "Não sou eu",
+          ),
+        ])
+      : null,
+
     el("div", { class: "grupo" }, [
       el("label", { class: "rotulo", for: "pub-nome" }, "Nome completo"),
       campoNome,
